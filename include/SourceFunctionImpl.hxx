@@ -23,6 +23,10 @@
             public:
                 SourceFunctionImpl(/* args */);
                 virtual ~SourceFunctionImpl(){}
+                SourceFunctionImpl(const SourceFunctionImpl&) = delete;
+                SourceFunctionImpl& operator=(const SourceFunctionImpl&) = delete;
+                SourceFunctionImpl(SourceFunctionImpl&&) noexcept = default;
+                SourceFunctionImpl& operator=(SourceFunctionImpl&&) noexcept = default;
                 [[nodiscard]] virtual double GetValue(float rStar, float rInv) const noexcept = 0;
                 [[nodiscard]] virtual double GetValue(float rOut, float rSide, float rLong, float Rout, float Rside, float Rlong) const noexcept = 0;
         };

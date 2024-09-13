@@ -28,6 +28,10 @@
             public:
                 CorrelationFunctionImpl(/* args */);
                 virtual ~CorrelationFunctionImpl(){}
+                CorrelationFunctionImpl(const CorrelationFunctionImpl&) = delete;
+                CorrelationFunctionImpl& operator=(const CorrelationFunctionImpl&) = delete;
+                CorrelationFunctionImpl(CorrelationFunctionImpl&&) noexcept = default;
+                CorrelationFunctionImpl& operator=(CorrelationFunctionImpl&&) noexcept = default;
                 virtual double Evaluate() = 0;
         };
 

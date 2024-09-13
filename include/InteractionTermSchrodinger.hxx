@@ -23,11 +23,16 @@
             private:
                 std::unique_ptr<CWaveFunction> m_waveFunction;
                 static constexpr std::string_view m_coralParFile{"wfparameters.dat"};
-                const int m_nqMax;
+                int m_nqMax;
 
             public:
                 InteractionTermSchrodinger(/* args */);
                 ~InteractionTermSchrodinger();
+                InteractionTermSchrodinger(const InteractionTermSchrodinger&) = delete;
+                InteractionTermSchrodinger& operator=(const InteractionTermSchrodinger&) = delete;
+                InteractionTermSchrodinger(InteractionTermSchrodinger&&) noexcept;
+                InteractionTermSchrodinger& operator=(InteractionTermSchrodinger&&) noexcept;
+
                 [[nodiscard]] double GetValue(int kStar, float rStar, float cosTheta);
         };
 

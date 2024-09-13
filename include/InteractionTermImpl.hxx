@@ -25,6 +25,10 @@
             public:
                 InteractionTermImpl(/* args */);
                 virtual ~InteractionTermImpl(){}
+                InteractionTermImpl(const InteractionTermImpl&) = delete;
+                InteractionTermImpl& operator=(const InteractionTermImpl&) = delete;
+                InteractionTermImpl(InteractionTermImpl&&) noexcept = default;
+                InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
                 [[nodiscard]] virtual double GetValue(int kStar, float rStar, float cosTheta) = 0;
         };
 
