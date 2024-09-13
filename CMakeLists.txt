@@ -7,6 +7,7 @@ project(
 
 # find necessary packages
 find_package(ROOT 6.26 CONFIG REQUIRED)
+find_package(GSL REQUIRED)
 
 # include necessary directories/features
 include(GNUInstallDirs)
@@ -38,19 +39,27 @@ set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install")
 add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-style-cast)
 
 # combine all .cxx and .hxx files
-set( sources
-    ${PROJECT_SOURCE_DIR}/src/
+set(SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
 )
-set( includes
+set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/Config.hxx
+    ${PROJECT_SOURCE_DIR}/include/CorrelationFunctionImpl.hxx
+    ${PROJECT_SOURCE_DIR}/include/FitterImpl.hxx
+    ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
+    ${PROJECT_SOURCE_DIR}/include/InteractionTermSchrodinger.hxx
+    ${PROJECT_SOURCE_DIR}/include/SourceFunction1D.hxx
+    ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )
 
 # ROOT creates his own dictionary for files where ROOT objects are used
-ROOT_GENERATE_DICTIONARY(JJCorrFitterDict ${includes} MODULE ${PROJECT_NAME} LINKDEF include/JJCorrFitterLinkDef.h)
+ROOT_GENERATE_DICTIONARY(JJCorrFitterDict ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF include/JJCorrFitterLinkDef.h)
 
 # creates our fitter library
-add_library(JJCorrFitter SHARED ${sources} JJCorrFitterDict.cxx ${includes})
+add_library(JJCorrFitter SHARED ${SRC_FILES} JJCorrFitterDict.cxx ${HEADER_FILES})
 target_compile_features(JJCorrFitter PRIVATE cxx_std_17)
+
 
 #sets different include destinations depending on if building or installing 
 target_include_directories(
@@ -59,7 +68,20 @@ target_include_directories(
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>" 
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 ) 
+target_include_directories(
+    JJCorrFitter
+    PUBLIC
+    "$<BUILD_INTERFACE:/home/jedkol/Downloads/CorAL/include>" 
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+) 
+#target_include_directories(JJCorrFitter PUBLIC /home/jedkol/Downloads/CorAL/include)
+
 target_link_libraries(JJCorrFitter ${ROOT_LIBRARIES})
+# I need to hardcode the CorAL unfortunately
+target_link_libraries(JJCorrFitter 
+    /home/jedkol/Downloads/CorAL/lib/libcoral.a 
+    /home/jedkol/Downloads/CorAL/lib/libcoralutils.a 
+)
 
 #Only prepares the JJCorrFitterTargets 
 install(TARGETS 
@@ -76,7 +98,7 @@ install(EXPORT
 )
 
 #Install the header files to same destination as that in target_include_directories 
-install(FILES ${includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}) 
+install(FILES ${HEADER_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}) 
 
 #Root wants this file in the same folder as the lib 
 install(FILES build/libJJCorrFitter_rdict.pcm DESTINATION ${CMAKE_INSTALL_LIBDIR})

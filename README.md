@@ -6,19 +6,20 @@ Correlation function fitting library
 ```mermaid
 
 classDiagram
-    Fitter1D <|-- Fitter
-    Fitter3D <|-- Fitter
-    CorrelationFunction <-- SourceFunction
-    CorrelationFunction1D <-- InteractionTerm
-    CorrelationFunction3D <-- InteractionTerm
+    Fitter1D <|-- FitterImpl
+    Fitter3D <|-- FitterImpl
+    CorrelationFunctionImpl <-- SourceFunctionImpl
+    CorrelationFunction1D <-- InteractionTermImpl
+    CorrelationFunction3D <-- InteractionTermImpl
+    InteractionTermSchrodinger <|-- InteractionTermImpl
     CorrelationFunction1D <-- IntegratorOneDim
     CorrelationFunction3D <-- IntegratorMultiDim
-    CorrelationFunction1D <|-- CorrelationFunction
-    CorrelationFunction3D <|-- CorrelationFunction
-    Fitter <-- CorrelationFunction
-    SourceFunction1D <|-- SourceFunction
-    SourceFunction3D <|-- SourceFunction
-    class Fitter{
+    CorrelationFunction1D <|-- CorrelationFunctionImpl
+    CorrelationFunction3D <|-- CorrelationFunctionImpl
+    FitterImpl <-- CorrelationFunctionImpl
+    SourceFunction1D <|-- SourceFunctionImpl
+    SourceFunction3D <|-- SourceFunctionImpl
+    class FitterImpl{
         +void Fit()
     }
     class Fitter1D{
@@ -29,7 +30,7 @@ classDiagram
         -TH3 data
         +TH3 GetFitResult()
     }
-    class SourceFunction{
+    class SourceFunctionImpl{
         +double Value()
     }
     class SourceFunction1D{
@@ -38,13 +39,15 @@ classDiagram
     class SourceFunction3D{
         +double Value(radii1,radii2,radii3)
     }
-    class CorrelationFunction{
+    class CorrelationFunctionImpl{
     }
     class CorrelationFunction1D{
     }
     class CorrelationFunction3D{
     }
-    class InteractionTerm{
+    class InteractionTermImpl{
+    }
+    class InteractionTermSchrodinger{
     }
 
 ```
