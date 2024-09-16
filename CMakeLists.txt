@@ -78,12 +78,19 @@ target_include_directories(
 ) 
 #target_include_directories(JJCorrFitter PUBLIC /home/jedkol/Downloads/CorAL/include)
 
-target_link_libraries(JJCorrFitter ${ROOT_LIBRARIES})
+target_link_libraries(JJCorrFitter 
+    ${ROOT_LIBRARIES} 
+    GSL::gsl 
+    GSL::gslcblas
+)
 # I need to hardcode the CorAL unfortunately
 target_link_libraries(JJCorrFitter 
     /home/jedkol/Downloads/CorAL/lib/libcoral.a 
     /home/jedkol/Downloads/CorAL/lib/libcoralutils.a 
 )
+
+add_executable(main ${PROJECT_SOURCE_DIR}/src/test.cxx)
+target_link_libraries(main JJCorrFitter)
 
 #Only prepares the JJCorrFitterTargets 
 install(TARGETS 

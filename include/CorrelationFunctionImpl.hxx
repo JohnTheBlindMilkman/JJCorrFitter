@@ -13,6 +13,8 @@
     #define CorrelationFunctionImpl_hxx
 
     #include <memory>
+    
+    #include <TH1.h>
 
     namespace JJCorrFitter
     {
@@ -20,14 +22,21 @@
         {
             private:
 
+            protected:
+                float m_minRStar, m_MaxRStar;
+                [[nodiscard]] virtual double CalculatePoint() = 0;
+
             public:
-                CorrelationFunctionImpl(/* args */) = default;
+                CorrelationFunctionImpl(/* args */) : m_minRStar(0.f), m_MaxRStar(20.f) {}
                 virtual ~CorrelationFunctionImpl(){}
                 CorrelationFunctionImpl(const CorrelationFunctionImpl&) = default;
                 CorrelationFunctionImpl& operator=(const CorrelationFunctionImpl&) = default;
                 CorrelationFunctionImpl(CorrelationFunctionImpl&&) noexcept = default;
                 CorrelationFunctionImpl& operator=(CorrelationFunctionImpl&&) noexcept = default;
-                [[nodiscard]] virtual double Evaluate() = 0;
+
+                [[nodiscard]] virtual std::unique_ptr<TH1> Evaluate() = 0;
+                virtual void SetIntegrationRange(float rStarMin, float rStarMax) noexcept = 0;
+                virtual void SetParameters() noexcept = 0;
         };
 
     } // namespace JJCorrFitter

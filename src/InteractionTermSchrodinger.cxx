@@ -3,10 +3,9 @@
 namespace JJCorrFitter
 {
     InteractionTermSchrodinger::InteractionTermSchrodinger() : 
-    m_waveFunction(new CWaveFunction_pp_schrod(m_coralParFile.data()))
+    m_waveFunction(new CWaveFunction_pp_schrod("./wfparameters.dat"))
     {
         m_nqMax = m_waveFunction->GetNQMAX();
-        m_kStar = 1;
     }
 
     InteractionTermSchrodinger::~InteractionTermSchrodinger()
@@ -28,15 +27,15 @@ namespace JJCorrFitter
         return *this;
     }
 
-    void InteractionTermSchrodinger::SetParameters(int kStar) noexcept
+    void InteractionTermSchrodinger::SetParameters(float kStar, float cosTheta) noexcept
     {
-        m_kStar = std::min(std::max(kStar,m_kStarMin),m_nqMax); // take the smaller value: tmp or nQmax (limited by CorAL); where tmp is greater value between k* and m_kStarMin
-        // baisically takes kStar between m_kStarMin and nQmax or rounds up/down the set value of kStar to match the limits
+        m_kStar = kStar;
+        m_cosTheta = cosTheta;
     }
 
-    double InteractionTermSchrodinger::GetValue(float rStar, float cosTheta)
+    double InteractionTermSchrodinger::GetValue(float rStar)
     {
-        return m_waveFunction->CalcPsiSquared(m_kStar,rStar,cosTheta);
+        return m_waveFunction->GetPsiSquared(m_kStar,rStar,m_cosTheta);
     }
 
 } // namespace JJCorrFitter

@@ -22,16 +22,20 @@
         {
             private:
                 /* data */
+
+            protected:
+                float m_kStar,m_cosTheta;
+
             public:
-                InteractionTermImpl(/* args */) = default;
+                InteractionTermImpl(/* args */) : m_kStar(1.f), m_cosTheta(0.f) {}
                 virtual ~InteractionTermImpl(){}
                 InteractionTermImpl(const InteractionTermImpl&) = default;
                 InteractionTermImpl& operator=(const InteractionTermImpl&) = default;
                 InteractionTermImpl(InteractionTermImpl&&) noexcept = default;
                 InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
 
-                virtual void SetParameters(int kStar) noexcept = 0;
-                [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
+                virtual void SetParameters(float kStar, float cosTheta) noexcept = 0;
+                [[nodiscard]] virtual double GetValue(float rStar) = 0;
         };
 
     } // namespace JJCorrFitter
