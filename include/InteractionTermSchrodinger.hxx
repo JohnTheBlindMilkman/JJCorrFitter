@@ -23,7 +23,8 @@
             private:
                 std::unique_ptr<CWaveFunction> m_waveFunction;
                 static constexpr std::string_view m_coralParFile{"wfparameters.dat"};
-                int m_nqMax;
+                static constexpr int m_kStarMin{0};
+                int m_nqMax, m_kStar;
 
             public:
                 InteractionTermSchrodinger(/* args */);
@@ -33,7 +34,8 @@
                 InteractionTermSchrodinger(InteractionTermSchrodinger&&) noexcept;
                 InteractionTermSchrodinger& operator=(InteractionTermSchrodinger&&) noexcept;
 
-                [[nodiscard]] double GetValue(int kStar, float rStar, float cosTheta);
+                void SetParameters(int kStar) noexcept;
+                [[nodiscard]] double GetValue(float rStar, float cosTheta);
         };
 
     } // namespace JJCorrFitter

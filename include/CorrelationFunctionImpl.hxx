@@ -14,25 +14,20 @@
 
     #include <memory>
 
-    #include "InteractionTermImpl.hxx"
-    #include "SourceFunctionImpl.hxx"
-
     namespace JJCorrFitter
     {
         class CorrelationFunctionImpl
         {
             private:
-                std::unique_ptr<InteractionTermImpl> m_psiSqrt;
-                std::unique_ptr<SourceFunctionImpl> m_sourceFunc;
 
             public:
-                CorrelationFunctionImpl(/* args */);
+                CorrelationFunctionImpl(/* args */) = default;
                 virtual ~CorrelationFunctionImpl(){}
-                CorrelationFunctionImpl(const CorrelationFunctionImpl&) = delete;
-                CorrelationFunctionImpl& operator=(const CorrelationFunctionImpl&) = delete;
+                CorrelationFunctionImpl(const CorrelationFunctionImpl&) = default;
+                CorrelationFunctionImpl& operator=(const CorrelationFunctionImpl&) = default;
                 CorrelationFunctionImpl(CorrelationFunctionImpl&&) noexcept = default;
                 CorrelationFunctionImpl& operator=(CorrelationFunctionImpl&&) noexcept = default;
-                virtual double Evaluate() = 0;
+                [[nodiscard]] virtual double Evaluate() = 0;
         };
 
     } // namespace JJCorrFitter

@@ -12,6 +12,8 @@
 #ifndef SourceFunctionImpl_hxx
     #define SourceFunctionImpl_hxx
 
+    #include <memory>
+
     #include "Math/Math.h"
 
     namespace JJCorrFitter
@@ -21,14 +23,15 @@
             private:
                 /* data */
             public:
-                SourceFunctionImpl(/* args */);
+                SourceFunctionImpl(/* args */) = default;
                 virtual ~SourceFunctionImpl(){}
-                SourceFunctionImpl(const SourceFunctionImpl&) = delete;
-                SourceFunctionImpl& operator=(const SourceFunctionImpl&) = delete;
+                SourceFunctionImpl(const SourceFunctionImpl&) = default;
+                SourceFunctionImpl& operator=(const SourceFunctionImpl&) = default;
                 SourceFunctionImpl(SourceFunctionImpl&&) noexcept = default;
                 SourceFunctionImpl& operator=(SourceFunctionImpl&&) noexcept = default;
-                [[nodiscard]] virtual double GetValue(float rStar, float rInv) const noexcept = 0;
-                [[nodiscard]] virtual double GetValue(float rOut, float rSide, float rLong, float Rout, float Rside, float Rlong) const noexcept = 0;
+
+                virtual void SetParameters(float rInv) noexcept = 0;
+                [[nodiscard]] virtual double GetValue(float rStar) const noexcept = 0;
         };
         
     } // namespace JJCorrFitter

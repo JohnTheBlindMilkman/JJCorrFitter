@@ -40,11 +40,13 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-s
 
 # combine all .cxx and .hxx files
 set(SRC_FILES
-    ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/CorrelationFunction1D.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
+    ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
 )
 set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/Config.hxx
+    ${PROJECT_SOURCE_DIR}/include/CorrelationFunction1D.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunctionImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/FitterImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx

@@ -2,8 +2,16 @@
 
 namespace JJCorrFitter
 {
-    double SourceFunction1D::GetValue(float rStar, float rInv) const noexcept
+    SourceFunction1D::SourceFunction1D() : m_invariantRadius(2.f)
+    {}
+
+    void SourceFunction1D::SetParameters(float rInv) noexcept
     {
-        return pow(4 * ROOT::Math::Pi() * rInv * rInv,-1.5) * exp(-0.25*rStar*rStar/(rInv*rInv));
+        m_invariantRadius = rInv;
+    }
+
+    double SourceFunction1D::GetValue(float rStar) const noexcept
+    {
+        return pow(4 * ROOT::Math::Pi() * m_invariantRadius * m_invariantRadius,-1.5) * exp(-0.25*rStar*rStar/(m_invariantRadius*m_invariantRadius));
     }
 } // namespace JJCorrFitter

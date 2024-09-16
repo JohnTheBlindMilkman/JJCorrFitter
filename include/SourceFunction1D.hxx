@@ -19,16 +19,18 @@
         class SourceFunction1D : public SourceFunctionImpl
         {
             private:
-                /* data */
+                float m_invariantRadius;
+
             public:
-                SourceFunction1D(/* args */) = default;
+                SourceFunction1D(/* args */);
                 ~SourceFunction1D() = default;
-                SourceFunction1D(const SourceFunction1D&) = delete;
-                SourceFunction1D& operator=(const SourceFunction1D&) = delete;
+                SourceFunction1D(const SourceFunction1D&) = default;
+                SourceFunction1D& operator=(const SourceFunction1D&) = default;
                 SourceFunction1D(SourceFunction1D&&) noexcept = default;
                 SourceFunction1D& operator=(SourceFunction1D&&) noexcept = default;
-                [[nodiscard]] double GetValue(float rStar, float rInv) const noexcept;
-                [[nodiscard]] double GetValue([[maybe_unused]] float rOut, [[maybe_unused]] float rSide, [[maybe_unused]] float rLong, [[maybe_unused]] float Rout, [[maybe_unused]] float Rside, [[maybe_unused]] float Rlong) const noexcept {return 0;}
+
+                void SetParameters(float rInv) noexcept;
+                [[nodiscard]] double GetValue(float rStar) const noexcept;
         };
 
     } // namespace JJCorrFitter

@@ -23,13 +23,15 @@
             private:
                 /* data */
             public:
-                InteractionTermImpl(/* args */);
+                InteractionTermImpl(/* args */) = default;
                 virtual ~InteractionTermImpl(){}
-                InteractionTermImpl(const InteractionTermImpl&) = delete;
-                InteractionTermImpl& operator=(const InteractionTermImpl&) = delete;
+                InteractionTermImpl(const InteractionTermImpl&) = default;
+                InteractionTermImpl& operator=(const InteractionTermImpl&) = default;
                 InteractionTermImpl(InteractionTermImpl&&) noexcept = default;
                 InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
-                [[nodiscard]] virtual double GetValue(int kStar, float rStar, float cosTheta) = 0;
+
+                virtual void SetParameters(int kStar) noexcept = 0;
+                [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
         };
 
     } // namespace JJCorrFitter
