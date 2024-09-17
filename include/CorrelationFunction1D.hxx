@@ -12,7 +12,7 @@
 #ifndef CorrelationFunction1D_hxx
     #define CorrelationFunction1D_hxx
 
-    #include "Math/Integrator.h"
+    #include "Math/IntegratorMultiDim.h"
     #include "TH1D.h"
 
     #include "CorrelationFunctionImpl.hxx"
@@ -26,9 +26,9 @@
             private:
                 InteractionTermSchrodinger m_ppSchroed;
                 SourceFunction1D m_source1D;
-                float m_cosTheta, m_minKStar,m_maxKStar;
+                float m_minKStar,m_maxKStar;
                 int m_nPoints;
-                const std::string m_histogramName{"hCF1D"}, m_histogramTitle{"One-dimensional correlation function"};
+                std::string m_histogramName, m_histogramTitle;
                 std::vector<double> m_correlationFunctionPoints;
 
                 [[nodiscard]] double CalculatePoint();
@@ -36,7 +36,7 @@
 
             public:
                 CorrelationFunction1D(/* args */) = delete;
-                CorrelationFunction1D(float kStarMin, float kStarMax, int nPoints);
+                CorrelationFunction1D(const std::string &name, const std::string &title, float kStarMin, float kStarMax, int nPoints);
                 ~CorrelationFunction1D() = default;
                 CorrelationFunction1D(const CorrelationFunction1D&) = delete;
                 CorrelationFunction1D& operator=(const CorrelationFunction1D&) = delete;

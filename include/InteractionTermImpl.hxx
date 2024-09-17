@@ -34,8 +34,8 @@
                 InteractionTermImpl(InteractionTermImpl&&) noexcept = default;
                 InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
 
-                virtual void SetParameters(float kStar, float cosTheta) noexcept = 0;
-                [[nodiscard]] virtual double GetValue(float rStar) = 0;
+                virtual void SetParameters(float kStar) noexcept = 0;
+                [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
         };
 
     } // namespace JJCorrFitter

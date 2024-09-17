@@ -2,9 +2,9 @@
 
 namespace JJCorrFitter
 {
-    CorrelationFunction1D::CorrelationFunction1D(float kStarMin, float kStarMax, int nPoints) : 
-    m_ppSchroed(), m_source1D(), m_cosTheta(1), m_minKStar(kStarMin), m_maxKStar(kStarMax), 
-    m_nPoints(nPoints), m_correlationFunctionPoints(0,nPoints)
+    CorrelationFunction1D::CorrelationFunction1D(const std::string &name, const std::string &title, float kStarMin, float kStarMax, int nPoints) : 
+    m_ppSchroed(), m_source1D(), m_minKStar(kStarMin), m_maxKStar(kStarMax), m_nPoints(nPoints), 
+    m_histogramName(name), m_histogramTitle(title), m_correlationFunctionPoints(0,nPoints)
     {}
 
     double CorrelationFunction1D::CalculatePoint()
@@ -15,12 +15,19 @@ namespace JJCorrFitter
 
     double CorrelationFunction1D::CalculatePoint(float kStar)
     {
-        m_ppSchroed.SetParameters(kStar,m_cosTheta);
+        m_ppSchroed.SetParameters(kStar);
 
-        ROOT::Math::WrappedFunction wf([&](double x){return m_source1D.GetValue(x) * m_ppSchroed.GetValue(x); });
-        ROOT::Math::Integrator integ(wf,ROOT::Math::IntegrationOneDim::kGAUSS,-1.0,-1.0,1000);
+        // implemented as in kernel.cc for identical particles in CorAL, i.e. Koonin-Pratt, but instead of |Psi|^2 we use Kernel in 1D
+        ROOT::Math::WrappedMultiFunction wfKP([&](double *x)
+        {
+            return m_source1D.GetValue(x[0]) * (m_ppSchroed.GetValue(x[0],x[1]) - 1) * (gsl_sf_legendre_Pl(0,x[1]) + gsl_sf_legendre_Pl(2,x[1])); 
+        });
+        ROOT::Math::IntegratorMultiDim integKP(wfKP,ROOT::Math::IntegrationMultiDim::kDEFAULT,-1.0,-1.0,1000);
 
-        return integ.IntegralUp(std::numeric_limits<float>::epsilon());
+
+        const std::vector<double> integMin = {std::numeric_limits<float>::epsilon(),-1};
+        const std::vector<double> integMax = {500,1};
+        return integKP.Integral(integMin.data(),integMax.data());
     }
 
     std::unique_ptr<TH1> CorrelationFunction1D::Evaluate()

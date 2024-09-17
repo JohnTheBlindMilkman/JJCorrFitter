@@ -27,15 +27,14 @@ namespace JJCorrFitter
         return *this;
     }
 
-    void InteractionTermSchrodinger::SetParameters(float kStar, float cosTheta) noexcept
+    void InteractionTermSchrodinger::SetParameters(float kStar) noexcept
     {
         m_kStar = kStar;
-        m_cosTheta = cosTheta;
     }
-
-    double InteractionTermSchrodinger::GetValue(float rStar)
+    
+    double InteractionTermSchrodinger::GetValue(float rStar, float cosTheta)
     {
-        return m_waveFunction->GetPsiSquared(m_kStar,rStar,m_cosTheta);
+        return m_waveFunction->GetPsiSquared(m_kStar,rStar,cosTheta);
     }
 
 } // namespace JJCorrFitter

@@ -12,19 +12,24 @@
 #ifndef FitterImpl_hxx
     #define FitterImpl_hxx
 
-    #include "CorrelationFunctionImpl.hxx"
+    #include "Math/Minimizer.h"
+    #include "Math/Factory.h"
 
     namespace JJCorrFitter
     {
         class FitterImpl
         {
             private:
-                std::unique_ptr<CorrelationFunctionImpl> m_corrFunction;
 
             public:
-                FitterImpl();
+                FitterImpl(){}
                 virtual ~FitterImpl(){}
-                virtual void Fit() = 0;
+                FitterImpl(const FitterImpl&) = delete;
+                FitterImpl& operator=(const FitterImpl&) = delete;
+                FitterImpl(FitterImpl&&) noexcept = default;
+                FitterImpl& operator=(FitterImpl&&) noexcept = default;
+
+                virtual bool Fit() = 0;
         };
 
     } // namespace JJCorrFitter

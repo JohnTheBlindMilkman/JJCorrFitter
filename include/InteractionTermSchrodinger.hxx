@@ -34,8 +34,8 @@
                 InteractionTermSchrodinger(InteractionTermSchrodinger&&) noexcept;
                 InteractionTermSchrodinger& operator=(InteractionTermSchrodinger&&) noexcept;
 
-                void SetParameters(float kStar, float cosTheta) noexcept;
-                [[nodiscard]] double GetValue(float rStar);
+                void SetParameters(float kStar) noexcept;
+                [[nodiscard]] double GetValue(float rStar, float cosTheta);
         };
 
     } // namespace JJCorrFitter
