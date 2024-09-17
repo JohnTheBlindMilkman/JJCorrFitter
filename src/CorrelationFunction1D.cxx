@@ -18,9 +18,9 @@ namespace JJCorrFitter
         m_ppSchroed.SetParameters(kStar,m_cosTheta);
 
         ROOT::Math::WrappedFunction wf([&](double x){return m_source1D.GetValue(x) * m_ppSchroed.GetValue(x); });
-        ROOT::Math::Integrator integ(wf,ROOT::Math::IntegrationOneDim::kDEFAULT,-1.0,-1.0,1000);
+        ROOT::Math::Integrator integ(wf,ROOT::Math::IntegrationOneDim::kGAUSS,-1.0,-1.0,1000);
 
-        return integ.Integral(m_minRStar,m_MaxRStar);
+        return integ.IntegralUp(std::numeric_limits<float>::epsilon());
     }
 
     std::unique_ptr<TH1> CorrelationFunction1D::Evaluate()

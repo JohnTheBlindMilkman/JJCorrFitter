@@ -44,7 +44,7 @@
                 CorrelationFunction1D& operator=(CorrelationFunction1D&&) noexcept = default;
 
                 [[nodiscard]] std::unique_ptr<TH1> Evaluate();
-                void SetIntegrationRange(float rStarMin, float rStarMax) noexcept;
+                [[deprecated]] void SetIntegrationRange(float rStarMin, float rStarMax) noexcept;
                 void SetParameters() noexcept;
                 void SetParameters(float rInv) noexcept;
         };
