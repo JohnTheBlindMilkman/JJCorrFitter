@@ -1,5 +1,8 @@
 #include "TFile.h"
-#include "Fitter1D.hxx"
+#include "Fitter.hxx"
+#include "CorrelationFunction1D.hxx"
+#include "ChiSquaredTest.hxx"
+#include "TH1D.h"
 
 int main()
 {
@@ -7,12 +10,18 @@ int main()
     std::unique_ptr<TH1D> hist(itp->Get<TH1D>("hQinvDRKt2"));
     // hist->SetDirectory(nullptr) ?
 
-    JJCorrFitter::Fitter1D fitter(std::move(hist));
-    hist = nullptr;
+    JJCorrFitter::Fitter fitter
+    (
+        std::move(hist),
+        std::make_unique<JJCorrFitter::CorrelationFunction1D>(),
+        std::make_unique<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("Minuit","Migrad")),
+        std::make_unique<JJCorrFitter::ChiSquaredTest>()
+    );
+    hist = nullptr; // I moved it so hist is undefined, hence the new assignment
 
-    fitter.SetParameter(JJCorrFitter::Fitter1D::Parameter::Lambda,1.);
-    fitter.SetParameter(JJCorrFitter::Fitter1D::Parameter::Norm,1.,0,10e4);
-    fitter.SetParameter(JJCorrFitter::Fitter1D::Parameter::Radius,2.,1,6);
+    fitter.SetParameter(0,"Lambda",1.);
+    fitter.SetParameter(1,"N",1.,0.1,0,10e4);
+    fitter.SetParameter(2,"Rinv",2.,0.1,1,6);
 
     fitter.Fit();
 

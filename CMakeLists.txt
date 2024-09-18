@@ -41,16 +41,19 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-s
 # combine all .cxx and .hxx files
 set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/CorrelationFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/Fitter.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
     ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
 )
 set(HEADER_FILES
+    ${PROJECT_SOURCE_DIR}/include/ChiSquaredTest.hxx
     ${PROJECT_SOURCE_DIR}/include/Config.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunction1D.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunctionImpl.hxx
-    ${PROJECT_SOURCE_DIR}/include/FitterImpl.hxx
+    ${PROJECT_SOURCE_DIR}/include/Fitter.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermSchrodinger.hxx
+    ${PROJECT_SOURCE_DIR}/include/LikelihoodImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunction1D.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )
@@ -91,6 +94,7 @@ target_link_libraries(JJCorrFitter
 
 add_executable(main ${PROJECT_SOURCE_DIR}/src/test.cxx)
 target_link_libraries(main JJCorrFitter)
+target_compile_features(main PRIVATE cxx_std_17)
 
 #Only prepares the JJCorrFitterTargets 
 install(TARGETS 

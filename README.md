@@ -17,8 +17,11 @@ classDiagram
     CorrelationFunction1D <|-- CorrelationFunctionImpl
     CorrelationFunction3D <|-- CorrelationFunctionImpl
     FitterImpl <-- CorrelationFunctionImpl
+    FitterImpl <-- LikelihoodImpl
     SourceFunction1D <|-- SourceFunctionImpl
     SourceFunction3D <|-- SourceFunctionImpl
+    LikelihoodImpl <|-- ChiSquaredTest
+    LikelihoodImpl <|-- LogLikelihoodTest
     class FitterImpl{
         +void Fit()
     }
@@ -48,6 +51,12 @@ classDiagram
     class InteractionTermImpl{
     }
     class InteractionTermSchrodinger{
+    }
+    class LikelihoodImpl{
+    }
+    class ChiSquaredTest{
+    }
+    class LogLikelihoodTest{
     }
 
 ```

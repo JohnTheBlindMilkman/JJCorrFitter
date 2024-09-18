@@ -37,9 +37,9 @@
                 [[nodiscard]] virtual std::unique_ptr<TH1> Evaluate() = 0;
                 virtual void SetIntegrationRange(float rStarMin, float rStarMax) noexcept = 0;
                 virtual void SetParameters() noexcept = 0;
+                [[nodiscard]] virtual int GetNParams() const = 0;
         };
 
     } // namespace JJCorrFitter
     
-
 #endif
