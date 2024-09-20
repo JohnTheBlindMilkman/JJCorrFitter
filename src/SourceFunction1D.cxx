@@ -3,11 +3,18 @@
 namespace JJCorrFitter
 {
     SourceFunction1D::SourceFunction1D() : m_invariantRadius(2.f)
-    {}
-
-    void SourceFunction1D::SetParameters(float rInv) noexcept
     {
-        m_invariantRadius = rInv;
+        m_numberOfParams = 1;
+    }
+
+    void SourceFunction1D::SetParameters(const std::vector<double> &pars)
+    {
+        if (pars.size() != m_numberOfParams)
+        {
+            throw std::length_error("SourceFunction1D::SetParameters - Provided number of parameters does not match the expected number: " + std::to_string(m_numberOfParams));
+        }
+
+        m_invariantRadius = pars.at(0);
     }
 
     double SourceFunction1D::GetValue(float rStar) const noexcept

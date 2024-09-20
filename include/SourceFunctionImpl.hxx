@@ -22,6 +22,10 @@
         {
             private:
                 /* data */
+
+            protected:
+                std::size_t m_numberOfParams;
+
             public:
                 SourceFunctionImpl(/* args */) = default;
                 virtual ~SourceFunctionImpl(){}
@@ -30,9 +34,12 @@
                 SourceFunctionImpl(SourceFunctionImpl&&) noexcept = default;
                 SourceFunctionImpl& operator=(SourceFunctionImpl&&) noexcept = default;
 
-                virtual void SetParameters(float rInv) noexcept = 0;
+                virtual void SetParameters(const std::vector<double> &pars) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar) const noexcept = 0;
+                [[nodiscard]] std::size_t GetNParams() const noexcept;
         };
+
+        inline std::size_t SourceFunctionImpl::GetNParams() const noexcept {return m_numberOfParams;}
         
     } // namespace JJCorrFitter
     

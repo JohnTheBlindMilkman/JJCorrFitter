@@ -15,6 +15,7 @@
     #include <memory>
     #include <string>
     #include <string_view>
+    #include <vector>
 
     namespace JJCorrFitter
     {
@@ -24,19 +25,23 @@
                 /* data */
 
             protected:
-                float m_kStar,m_cosTheta;
+                std::size_t m_numberOfParams;
 
             public:
-                InteractionTermImpl(/* args */) : m_kStar(1.f), m_cosTheta(0.f) {}
+                InteractionTermImpl(/* args */) = default;
                 virtual ~InteractionTermImpl(){}
                 InteractionTermImpl(const InteractionTermImpl&) = default;
                 InteractionTermImpl& operator=(const InteractionTermImpl&) = default;
                 InteractionTermImpl(InteractionTermImpl&&) noexcept = default;
                 InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
 
-                virtual void SetParameters(float kStar) noexcept = 0;
+                virtual void SetParameters(const std::vector<double> &pars) = 0;
+                virtual void SetMomentum(float kStar) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
+                [[nodiscard]] std::size_t GetNParams() const noexcept;
         };
+
+        inline std::size_t InteractionTermImpl::GetNParams() const noexcept {return m_numberOfParams;}
 
     } // namespace JJCorrFitter
     

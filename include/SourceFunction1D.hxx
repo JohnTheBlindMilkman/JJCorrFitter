@@ -12,6 +12,8 @@
 #ifndef SourceFunction1D_hxx
     #define SourceFunction1D_hxx
 
+    #include <vector>
+
     #include "SourceFunctionImpl.hxx"
 
     namespace JJCorrFitter
@@ -19,7 +21,7 @@
         class SourceFunction1D : public SourceFunctionImpl
         {
             private:
-                float m_invariantRadius;
+                double m_invariantRadius;
 
             public:
                 SourceFunction1D(/* args */);
@@ -29,7 +31,7 @@
                 SourceFunction1D(SourceFunction1D&&) noexcept = default;
                 SourceFunction1D& operator=(SourceFunction1D&&) noexcept = default;
 
-                void SetParameters(float rInv) noexcept;
+                void SetParameters(const std::vector<double> &pars);
                 [[nodiscard]] double GetValue(float rStar) const noexcept;
         };
 

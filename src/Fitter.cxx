@@ -2,8 +2,9 @@
 
 namespace JJCorrFitter
 {
-    Fitter::Fitter(std::unique_ptr<TH1> &&data, std::unique_ptr<CorrelationFunctionImpl> &&function, std::unique_ptr<ROOT::Math::Minimizer> &&minimiser ,std::unique_ptr<LikelihoodImpl> &&test) :
-    m_dataToFit(std::move(data)), m_corrFunction(std::move(function)), m_minimiser(std::move(minimiser)), m_likelyhoodTest(std::move(test))
+    Fitter::Fitter(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser ,std::unique_ptr<LikelihoodImpl> &&test) :
+    m_currentParNumber(0), m_minimiser(std::move(minimiser)), m_likelyhoodTest(std::move(test)),
+    m_parCounter{{ParType::Generic,{}},{ParType::Source,{}},{ParType::Interaction,{}}}
     {
         if (m_minimiser == nullptr)
             throw std::runtime_error("Fitter::Fitter - Error: cannot create minimizer");
@@ -14,26 +15,15 @@ namespace JJCorrFitter
     }
 
     Fitter::Fitter(Fitter &&other) noexcept : 
-    m_dataToFit(std::exchange(other.m_dataToFit,nullptr)), m_corrFunction(std::exchange(other.m_corrFunction,nullptr)), 
-    m_minimiser(std::exchange(other.m_minimiser,nullptr)), m_likelyhoodTest(std::exchange(other.m_likelyhoodTest,nullptr))
+    m_minimiser(std::exchange(other.m_minimiser,nullptr)), m_likelyhoodTest(std::exchange(other.m_likelyhoodTest,nullptr)),
+    m_parCounter(std::move(other.m_parCounter))
     {}
 
     Fitter& Fitter::operator=(Fitter &&other) noexcept
     {
-        m_dataToFit = std::exchange(other.m_dataToFit,nullptr);
-        m_corrFunction = std::exchange(other.m_corrFunction,nullptr);
         m_minimiser = std::exchange(other.m_minimiser,nullptr);
         m_likelyhoodTest = std::exchange(other.m_likelyhoodTest,nullptr);
-    }
-
-    void Fitter::SetHistogram(std::unique_ptr<TH1> &&data) noexcept
-    {
-        m_dataToFit = std::move(data);
-    }
-
-    void Fitter::SetCorrelationFunction(std::unique_ptr<CorrelationFunctionImpl> &&function) noexcept
-    {
-        m_corrFunction = std::move(function);
+        m_parCounter = std::move(other.m_parCounter);
     }
 
     void Fitter::SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept
@@ -46,21 +36,30 @@ namespace JJCorrFitter
         m_likelyhoodTest = std::move(test);
     }
     
-    void Fitter::SetParameter(int ival, const std::string &name, float start, float step, float min, float max)
+    void Fitter::SetParameter(ParType type, const std::string &name, float start, float step, float min, float max)
     {
-        m_minimiser->SetLimitedVariable(ival,name,start,step,min,max);
+        //m_minimiser->SetLimitedVariable(m_currentParNumber,name,start,step,min,max);
+        m_parCounter[type].push_back(m_currentParNumber);
+        ++m_currentParNumber;
     }
 
-    void Fitter::SetParameter(int ival, const std::string &name, float start)
+    void Fitter::SetParameter(ParType type, const std::string &name, float start)
     {
-        m_minimiser->SetFixedVariable(ival,name,start);
+        //m_minimiser->SetFixedVariable(m_currentParNumber,name,start);
+        m_parCounter[type].push_back(m_currentParNumber);
+        ++m_currentParNumber;
     }
 
     bool Fitter::Fit()
     {
-        ROOT::Math::Functor f(m_likelyhoodTest->GetTestFunction(),3);
+        ROOT::Math::Functor f(m_likelyhoodTest->GetObjectiveFunction(m_parCounter.at(ParType::Generic),m_parCounter.at(ParType::Source),m_parCounter.at(ParType::Interaction)),m_likelyhoodTest->GetNParams());
         m_minimiser->SetFunction(f);
-        return m_minimiser->Minimize();
+
+        m_minimiser->SetLimitedVariable(0,"N",50,1,10,100);
+        m_minimiser->SetFixedVariable(1,"Lambda",1);
+        m_minimiser->SetLimitedVariable(2,"Rinv",3,0.1,1,6); // I need to fix this somehow. Par limits can be set only after we set the function
+
+        return m_minimiser->Minimize(); // TH1 is being overriden and produces waring and potentially memory leaks. Maybe we switch to vectors?
     }
 
     void Fitter::PrintInfo() const

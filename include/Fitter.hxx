@@ -24,29 +24,30 @@
     {
         class Fitter
         {
+            public: 
+                enum class ParType{Generic,Source,Interaction};
+
             private:
-                std::unique_ptr<TH1> m_dataToFit;
-                std::unique_ptr<CorrelationFunctionImpl> m_corrFunction;
+                std::size_t m_currentParNumber;
                 std::unique_ptr<ROOT::Math::Minimizer> m_minimiser;
                 std::unique_ptr<LikelihoodImpl> m_likelyhoodTest;
+                std::unordered_map<ParType,std::vector<std::size_t> > m_parCounter;
 
                 void PrintInfo() const;
 
             public:
                 Fitter() = delete;
-                Fitter(std::unique_ptr<TH1> &&data, std::unique_ptr<CorrelationFunctionImpl> &&function, std::unique_ptr<ROOT::Math::Minimizer> &&minimiser ,std::unique_ptr<LikelihoodImpl> &&test);
+                Fitter(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser ,std::unique_ptr<LikelihoodImpl> &&test);
                 ~Fitter() = default;
                 Fitter(const Fitter&) = delete;
                 Fitter& operator=(const Fitter&) = delete;
                 Fitter(Fitter&&) noexcept;
                 Fitter& operator=(Fitter&&) noexcept;
 
-                void SetHistogram(std::unique_ptr<TH1> &&data) noexcept;
-                void SetCorrelationFunction(std::unique_ptr<CorrelationFunctionImpl> &&function) noexcept;
                 void SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept;
                 void SetGoodnessTest(std::unique_ptr<LikelihoodImpl> &&test) noexcept;
-                void SetParameter(int ival, const std::string &name, float start, float step, float min, float max);
-                void SetParameter(int ival, const std::string &name, float start);
+                void SetParameter(ParType type, const std::string &name, float start, float step, float min, float max);
+                void SetParameter(ParType type, const std::string &name, float start);
                 bool Fit();
         };
 

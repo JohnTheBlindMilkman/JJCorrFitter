@@ -15,17 +15,15 @@
     #include "Math/IntegratorMultiDim.h"
     #include "TH1D.h"
 
+    #include "gsl/gsl_sf_legendre.h"
+
     #include "CorrelationFunctionImpl.hxx"
-    #include "InteractionTermSchrodinger.hxx"
-    #include "SourceFunction1D.hxx"
 
     namespace JJCorrFitter
     {
         class CorrelationFunction1D : public CorrelationFunctionImpl
         {
             private:
-                InteractionTermSchrodinger m_ppSchroed;
-                SourceFunction1D m_source1D;
                 float m_minKStar,m_maxKStar;
                 int m_nPoints;
                 std::string m_histogramName, m_histogramTitle;
@@ -36,7 +34,8 @@
 
             public:
                 CorrelationFunction1D(/* args */) = delete;
-                CorrelationFunction1D(const std::string &name, const std::string &title, float kStarMin, float kStarMax, int nPoints);
+                //CorrelationFunction1D(const std::string &name, const std::string &title, float kStarMin, float kStarMax, int nPoints);
+                CorrelationFunction1D(std::unique_ptr<SourceFunctionImpl> &&source, std::unique_ptr<InteractionTermImpl> &&interact);
                 ~CorrelationFunction1D() = default;
                 CorrelationFunction1D(const CorrelationFunction1D&) = delete;
                 CorrelationFunction1D& operator=(const CorrelationFunction1D&) = delete;
@@ -44,10 +43,11 @@
                 CorrelationFunction1D& operator=(CorrelationFunction1D&&) noexcept = default;
 
                 [[nodiscard]] std::unique_ptr<TH1> Evaluate();
-                [[deprecated]] void SetIntegrationRange(float rStarMin, float rStarMax) noexcept;
-                void SetParameters() noexcept;
-                void SetParameters(float rInv) noexcept;
+                void SetParameters(const std::vector<double> &generalPars,const std::vector<double> &srcPars,const std::vector<double> &psiPars);
+                [[nodiscard]] std::size_t GetNParams() const noexcept;
         };
+
+        [[nodiscard]] inline std::size_t CorrelationFunction1D::GetNParams() const noexcept {return m_numberOfParams;} 
         
     } // namespace JJCorrFitter
     

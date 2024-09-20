@@ -25,6 +25,7 @@
                 const std::string m_coralParFile{"./wfparameters.dat"};
                 static constexpr int m_kStarMin{0};
                 int m_nqMax;
+                float m_kStar;
 
             public:
                 InteractionTermSchrodinger(/* args */);
@@ -34,7 +35,8 @@
                 InteractionTermSchrodinger(InteractionTermSchrodinger&&) noexcept;
                 InteractionTermSchrodinger& operator=(InteractionTermSchrodinger&&) noexcept;
 
-                void SetParameters(float kStar) noexcept;
+                void SetParameters(const std::vector<double> &pars);
+                void SetMomentum(float kStar);
                 [[nodiscard]] double GetValue(float rStar, float cosTheta);
         };
 

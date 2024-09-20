@@ -3,8 +3,9 @@
 namespace JJCorrFitter
 {
     InteractionTermSchrodinger::InteractionTermSchrodinger() : 
-    m_waveFunction(new CWaveFunction_pp_schrod("./wfparameters.dat"))
+    m_waveFunction(new CWaveFunction_pp_schrod("./wfparameters.dat")), m_kStar(5.)
     {
+        m_numberOfParams = 0;
         m_nqMax = m_waveFunction->GetNQMAX();
     }
 
@@ -27,7 +28,15 @@ namespace JJCorrFitter
         return *this;
     }
 
-    void InteractionTermSchrodinger::SetParameters(float kStar) noexcept
+    void InteractionTermSchrodinger::SetParameters(const std::vector<double> &pars)
+    {
+        if (pars.size() != m_numberOfParams)
+        {
+            throw std::length_error("InteractionTermSchrodinger::SetParameters - Provided number of parameters does not match the expected number: " + std::to_string(m_numberOfParams));
+        }
+    }
+
+    void InteractionTermSchrodinger::SetMomentum(float kStar)
     {
         m_kStar = kStar;
     }
