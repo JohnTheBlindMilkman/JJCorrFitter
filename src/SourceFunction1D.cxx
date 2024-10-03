@@ -4,6 +4,7 @@ namespace JJCorrFitter
 {
     SourceFunction1D::SourceFunction1D() : m_invariantRadius(2.f)
     {
+        m_sourceFunctionName = "Gaussian";
         m_numberOfParams = 1;
     }
 

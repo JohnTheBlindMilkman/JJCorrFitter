@@ -16,11 +16,11 @@
 
     namespace JJCorrFitter::Config
     {
-        inline constexpr std::string_view projectName{ "@PROJECT_NAME@" };
-        inline constexpr std::string_view projectVersion{ "@PROJECT_VERSION@" };
-        inline constexpr int projectVersionMajor { @PROJECT_VERSION_MAJOR@ };
-        inline constexpr int projectVersionMinor { @PROJECT_VERSION_MINOR@ };
-        inline constexpr int projectVersionPatch { @PROJECT_VERSION_PATCH@ };
+        inline constexpr std::string_view m_projectName{ "@PROJECT_NAME@" };
+        inline constexpr std::string_view m_projectVersion{ "@PROJECT_VERSION@" };
+        inline constexpr int m_projectVersionMajor { @PROJECT_VERSION_MAJOR@ };
+        inline constexpr int m_projectVersionMinor { @PROJECT_VERSION_MINOR@ };
+        inline constexpr int m_projectVersionPatch { @PROJECT_VERSION_PATCH@ };
     } // namespace JJCorrFitter::Config
     
 

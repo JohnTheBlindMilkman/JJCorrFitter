@@ -26,6 +26,7 @@
 
             protected:
                 std::size_t m_numberOfParams;
+                std::string_view m_InteractionTermName;
 
             public:
                 InteractionTermImpl(/* args */) = default;
@@ -39,9 +40,11 @@
                 virtual void SetMomentum(float kStar) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
+                [[nodiscard]] std::string_view GetInteractiontermName() const noexcept;
         };
 
         inline std::size_t InteractionTermImpl::GetNParams() const noexcept {return m_numberOfParams;}
+        inline std::string_view InteractionTermImpl::GetInteractiontermName() const noexcept {return m_InteractionTermName;}
 
     } // namespace JJCorrFitter
     

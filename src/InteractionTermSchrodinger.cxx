@@ -5,6 +5,7 @@ namespace JJCorrFitter
     InteractionTermSchrodinger::InteractionTermSchrodinger() : 
     m_waveFunction(new CWaveFunction_pp_schrod("./wfparameters.dat")), m_kStar(5.)
     {
+        m_InteractionTermName = "p-p Schroedinger solution (CorAL)";
         m_numberOfParams = 0;
         m_nqMax = m_waveFunction->GetNQMAX();
     }

@@ -18,7 +18,8 @@
         class ChiSquaredTest : public LikelihoodImpl
         {
             private:
-                /* data */
+                double CalculateChi2(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model); // this is not ideal implementation; const unique_ptr does not guarantee const TH1! I should use shared_ptr or raw
+
             public:
                 ChiSquaredTest(/* args */) = delete;
                 ChiSquaredTest(std::unique_ptr<TH1> &&data, std::unique_ptr<CorrelationFunctionImpl> &&func);

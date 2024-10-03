@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.1...3.29)
 project(
     JJCorrFitter
-    VERSION 0.2.0
+    VERSION 0.3.0
     LANGUAGES CXX
 )
 
 # find necessary packages
 find_package(ROOT 6.26 CONFIG REQUIRED)
 find_package(GSL REQUIRED)
+find_package(Boost REQUIRED)
 
 # include necessary directories/features
 include(GNUInstallDirs)
@@ -44,7 +45,9 @@ set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/CorrelationFunction1D.cxx
     ${PROJECT_SOURCE_DIR}/src/Fitter.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
+    ${PROJECT_SOURCE_DIR}/src/InteractionTermTPI.cxx
     ${PROJECT_SOURCE_DIR}/src/LikelihoodImpl.cxx
+    ${PROJECT_SOURCE_DIR}/src/LogLikelihoodTest.cxx
     ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
 )
 set(HEADER_FILES
@@ -55,7 +58,9 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/Fitter.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermSchrodinger.hxx
+    ${PROJECT_SOURCE_DIR}/include/InteractionTermTPI.hxx
     ${PROJECT_SOURCE_DIR}/include/LikelihoodImpl.hxx
+    ${PROJECT_SOURCE_DIR}/include/LogLikelihoodTest.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunction1D.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )
@@ -78,6 +83,12 @@ target_include_directories(
 target_include_directories(
     JJCorrFitter
     PUBLIC
+    "$<BUILD_INTERFACE:${Boost_INCLUDE_DIR}>" 
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+) 
+target_include_directories(
+    JJCorrFitter
+    PUBLIC
     "$<BUILD_INTERFACE:/home/jedkol/Downloads/CorAL/include>" 
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 ) 
@@ -87,6 +98,7 @@ target_link_libraries(JJCorrFitter
     ${ROOT_LIBRARIES} 
     GSL::gsl 
     GSL::gslcblas
+    ${Boost_LIBRARIES}
 )
 # I need to hardcode the CorAL unfortunately
 target_link_libraries(JJCorrFitter 

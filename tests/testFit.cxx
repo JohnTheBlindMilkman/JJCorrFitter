@@ -1,41 +1,63 @@
-#include "TFile.h"
-#include "Minuit2/Minuit2Minimizer.h"
 #include "Fitter.hxx"
 #include "CorrelationFunction1D.hxx"
 #include "SourceFunction1D.hxx"
 #include "InteractionTermSchrodinger.hxx"
+#include "InteractionTermTPI.hxx"
 #include "ChiSquaredTest.hxx"
+#include "LogLikelihoodTest.hxx"
+
+#include "Minuit2/Minuit2Minimizer.h"
+#include "TFile.h"
 #include "TH1D.h"
+#include "TCanvas.h"
 
 int main()
 {
     using ParType = JJCorrFitter::Fitter::ParType;
 
-    TFile *itp = TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_DR_forHAL.root");
-    std::unique_ptr<TH1D> hist(itp->Get<TH1D>("hQinvDRKt2"));
+    TFile *itp = TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_forHAL.root");
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatKt2"));
+    //std::unique_ptr<TH1> signal(itp->Get<TH1D>("hQinvSignKt2"));
+    //std::unique_ptr<TH1> background(itp->Get<TH1D>("hQinvBckgKt2"));
     // hist->SetDirectory(nullptr) ?
 
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>(
         std::make_unique<JJCorrFitter::SourceFunction1D>(),
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
         );
+    //func->SetBinning("hCF","",23,6,52);
+    func->SetBinning(hist,2,150);
 
     JJCorrFitter::Fitter fitter
     (
-        std::unique_ptr<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("Minuit","Migrad")),
+        std::unique_ptr<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("Minuit2","Migrad")),
         std::make_unique<JJCorrFitter::ChiSquaredTest>(std::move(hist),std::move(func))
     );
     hist = nullptr; // I moved it so hist is undefined, hence the new assignment
 
-    fitter.SetParameter(ParType::Generic,"N",1.,0.1,0,10e4);
-    fitter.SetParameter(ParType::Generic,"Lambda",1.);
-    fitter.SetParameter(ParType::Source,"Rinv",2.,0.1,1,6);
+    fitter.SetParameter(ParType::Generic,"N",1.);
+    fitter.SetParameter(ParType::Generic,"Lambda",0.4,0.001,0.,1.);
+    fitter.SetParameter(ParType::Source,"Rinv",2.,0.001,1.,6.);
+
+    fitter.SetTolerance(1e-9);
+
+    fitter.PrintInfo();
 
     fitter.Fit();
 
-    //TFile otp("fit1DCF.root","recreate");
+    std::unique_ptr<TH1> cf = fitter.GetFitFunction();
+    hist = fitter.GetDataHistogram();
+    hist->GetXaxis()->SetRangeUser(0,200);
 
-    // fitter.GetFitFunction()->Write();
+    std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
+    hist->Draw();
+    cf->SetLineColor(kRed);
+    cf->Draw("c same");
 
-    //otp.Close();
+    std::unique_ptr<TFile> otp(TFile::Open("fit1DCF.root","recreate"));
+    c->Write();
+    hist->Write();
+    cf->Write();
+
+    otp->Close();
 }

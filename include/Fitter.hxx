@@ -12,6 +12,8 @@
 #ifndef Fitter_hxx
     #define Fitter_hxx
 
+    #include <map>
+
     #include "Math/Minimizer.h"
     #include "Math/Factory.h"
     #include "Math/Functor.h"
@@ -28,12 +30,28 @@
                 enum class ParType{Generic,Source,Interaction};
 
             private:
+                struct ParInfo
+                {
+                    std::size_t number;
+                    std::string name;
+                    float start,step,min,max;
+                    bool isFixed;
+                };
+
                 std::size_t m_currentParNumber;
                 std::unique_ptr<ROOT::Math::Minimizer> m_minimiser;
                 std::unique_ptr<LikelihoodImpl> m_likelyhoodTest;
-                std::unordered_map<ParType,std::vector<std::size_t> > m_parCounter;
+                std::map<ParType,std::vector<ParInfo> > m_parMap;
+                std::vector<double> m_valuesAtMinimum, m_errorsAtMinimum;
+                double m_tolerance, m_minFunctionValue;
+                unsigned int m_maxFunctionCalls;
+                int m_printLevel;
 
-                void PrintInfo() const;
+                [[nodiscard]] std::vector<std::size_t> GetIndices(const std::vector<ParInfo> &vec) const noexcept;
+                [[nodiscard]] std::vector<double> PassPointerArrayToVector(const double *arr, std::size_t size);
+                void PassParametersToMinimiser(const std::map<ParType,std::vector<ParInfo> > &params);
+                void PrintHello() const;
+                void PrintFitResult() const;
 
             public:
                 Fitter() = delete;
@@ -46,10 +64,24 @@
 
                 void SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept;
                 void SetGoodnessTest(std::unique_ptr<LikelihoodImpl> &&test) noexcept;
+                void SetMaxFunctionCalls(unsigned int maxCalls);
+                void SetTolerance(double tol);
+                void SetPrintLevel(int lvl);
                 void SetParameter(ParType type, const std::string &name, float start, float step, float min, float max);
                 void SetParameter(ParType type, const std::string &name, float start);
                 bool Fit();
+                void PrintInfo() const;
+                [[nodiscard]] std::unique_ptr<TH1> GetFitFunction() noexcept;
+                [[nodiscard]] std::unique_ptr<TH1> GetDataHistogram() noexcept;
         };
+
+        inline void Fitter::SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept {m_minimiser = std::move(minimiser);}
+        inline void Fitter::SetGoodnessTest(std::unique_ptr<LikelihoodImpl> &&test) noexcept {m_likelyhoodTest = std::move(test);}
+        inline void Fitter::SetMaxFunctionCalls(unsigned int maxCalls) {m_maxFunctionCalls = maxCalls; m_minimiser->SetMaxFunctionCalls(m_maxFunctionCalls);}
+        inline void Fitter::SetTolerance(double tol) {m_tolerance = tol; m_minimiser->SetTolerance(m_tolerance);}
+        inline void Fitter::SetPrintLevel(int lvl) {m_printLevel = lvl; m_minimiser->SetPrintLevel(m_printLevel);}
+        inline std::unique_ptr<TH1> Fitter::GetFitFunction() noexcept {return std::move(m_likelyhoodTest->GetCorrelationFunction());}
+        inline std::unique_ptr<TH1> Fitter::GetDataHistogram() noexcept {return std::move(m_likelyhoodTest->GetHistogram());}
 
     } // namespace JJCorrFitter
 

@@ -25,6 +25,7 @@
 
             protected:
                 std::size_t m_numberOfParams;
+                std::string_view m_sourceFunctionName;
 
             public:
                 SourceFunctionImpl(/* args */) = default;
@@ -37,9 +38,11 @@
                 virtual void SetParameters(const std::vector<double> &pars) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar) const noexcept = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
+                [[nodiscard]] std::string_view GetSourceFunctionName() const noexcept;
         };
 
         inline std::size_t SourceFunctionImpl::GetNParams() const noexcept {return m_numberOfParams;}
+        inline std::string_view SourceFunctionImpl::GetSourceFunctionName() const noexcept {return m_sourceFunctionName;}
         
     } // namespace JJCorrFitter
     
