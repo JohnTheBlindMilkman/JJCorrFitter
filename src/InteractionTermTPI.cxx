@@ -52,6 +52,7 @@ namespace JJCorrFitter
         }
 
         InitializeGamow();
+        m_InteractionTermName = "p-p Lednicky-Lyuboshitz (TPI)";
     }
 
     void InteractionTermTPI::InitializeGamow() 
@@ -108,7 +109,7 @@ namespace JJCorrFitter
 
     void InteractionTermTPI::SetMomentum(float kStar)
     {
-        fKStar = kStar;
+        fKStar = kStar * m_mevToGev;
     }
     
     double InteractionTermTPI::GetValue(float rStar, float cosTheta)
@@ -146,7 +147,8 @@ namespace JJCorrFitter
 
         // Classical limit - if distance is larger than Coulomb radius,
         // the interaction does not matter
-        //  if (fabs(rStar) > fabs(pionac)) return (1.0 + wavesign*cos(2*tKstRst));
+        //if (fabs(rStar) > fabs(fPionac)) 
+            //return (1.0 + wavesign*cos(2*tKstRst));
 
         // Classical limit - in the case of large k* we go to
         // classical coulomb interaction
@@ -427,7 +429,7 @@ namespace JJCorrFitter
         if (rStar < 0.0000000001) 
             return 1.0;
 
-        double kstrst = fKStarOut * fRStarOutS + fKStarSide * fRStarSideS + fKStarLong * fRStarLongS;
+        double kstrst = fKStar * rStar * cosTheta;
         int ccase     = 0;
         int wavesign  = 1;
 
@@ -479,12 +481,11 @@ namespace JJCorrFitter
                 (1.0 - 1.0 / (rStar * (1.0 - kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
             if (asym < 1.0)
-                asym = 1.0 + (asym - 1.0) * 2.0;
+                ffminus.real(1.0 + (asym - 1.0) * 2.0);
             else
-                asym = 1.0 + (asym - 1.0) / 2.0;
+                ffminus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffminus.real(asym);
-            ffminus = {asym,sqrt(asym * asym - ffminus.real() * ffminus.real())};
+            ffminus.imag(sqrt(asym * asym - ffminus.real() * ffminus.real()));
             ccase      = 2;
         } 
         else 
@@ -495,12 +496,11 @@ namespace JJCorrFitter
             asym = (1.0 - 1.0 / (rStar * (1.0 + kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
             if (asym < 1.0)
-                asym = 1.0 + (asym - 1.0) * 2.0;
+                ffplus.real(1.0 + (asym - 1.0) * 2.0);
             else
-                asym = 1.0 + (asym - 1.0) / 2.0;
+                ffplus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffplus.real(asym);
-            ffplus = {asym,sqrt(asym * asym - ffplus.real() * ffplus.real())};
+            ffplus.imag(sqrt(asym * asym - ffplus.real() * ffplus.real()));
             ccase = 3;
         }
 

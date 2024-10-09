@@ -45,6 +45,7 @@ set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/CorrelationFunction1D.cxx
     ${PROJECT_SOURCE_DIR}/src/Fitter.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
+    ${PROJECT_SOURCE_DIR}/src/InteractionTermPhaseShift.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermTPI.cxx
     ${PROJECT_SOURCE_DIR}/src/LikelihoodImpl.cxx
     ${PROJECT_SOURCE_DIR}/src/LogLikelihoodTest.cxx
@@ -58,6 +59,7 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/Fitter.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermSchrodinger.hxx
+    ${PROJECT_SOURCE_DIR}/include/InteractionTermPhaseShift.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermTPI.hxx
     ${PROJECT_SOURCE_DIR}/include/LikelihoodImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/LogLikelihoodTest.hxx

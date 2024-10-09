@@ -77,8 +77,7 @@
                 std::complex<long double> fD0s, fF0s, fD0t, fF0t;
                 long double fPionac, fOneoveracsq, fTwopioverac, fCoulqscpart, fEuler, fF0, fD0;
                 int fTwospin, fWritegrps, fPcount, fCoulombSteps;
-                double fRStarOutS, fRStarSideS, fRStarLongS, fRStarS, fRStarOut, fRStarSide, fRStarLong, fRStar, fKStarOut, fKStarSide, fKStarLong, fKStar;
-                float m_kStar;
+                double m_kStar, fRStarOutS, fRStarSideS, fRStarLongS, fRStarS, fRStarOut, fRStarSide, fRStarLong, fRStar, fKStarOut, fKStarSide, fKStarLong, fKStar;
 
             public:
                 InteractionTermTPI() = delete;
