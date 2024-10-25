@@ -29,6 +29,8 @@ endif()
 
 # enables testing
 if(JJCORRFITTER_ENABLE_TESTS)
+    find_package(Catch2 REQUIRED)
+    include(Catch)
     add_subdirectory(tests)
     enable_testing()
 endif()
@@ -37,6 +39,7 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install")
 
+# add some extra compile flags
 add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-style-cast)
 
 # combine all .cxx and .hxx files
@@ -67,11 +70,11 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )
 
-# ROOT creates his own dictionary for files where ROOT objects are used
-ROOT_GENERATE_DICTIONARY(JJCorrFitterDict ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF include/JJCorrFitterLinkDef.h)
+# ROOT creates his own dictionary for classes which derive from ROOT
+#ROOT_GENERATE_DICTIONARY(JJCorrFitterDict ${HEADER_FILES} MODULE ${PROJECT_NAME} LINKDEF include/JJCorrFitterLinkDef.h)
 
 # creates our fitter library
-add_library(JJCorrFitter SHARED ${SRC_FILES} JJCorrFitterDict.cxx ${HEADER_FILES})
+add_library(JJCorrFitter SHARED ${SRC_FILES} ${HEADER_FILES})
 target_compile_features(JJCorrFitter PRIVATE cxx_std_17)
 
 
@@ -94,7 +97,6 @@ target_include_directories(
     "$<BUILD_INTERFACE:/home/jedkol/Downloads/CorAL/include>" 
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 ) 
-#target_include_directories(JJCorrFitter PUBLIC /home/jedkol/Downloads/CorAL/include)
 
 target_link_libraries(JJCorrFitter 
     ${ROOT_LIBRARIES} 

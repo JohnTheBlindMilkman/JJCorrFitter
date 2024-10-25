@@ -5,6 +5,7 @@ namespace JJCorrFitter
     ChiSquaredTest::ChiSquaredTest(std::unique_ptr<TH1> &&data, std::unique_ptr<CorrelationFunctionImpl> &&func)
     {
         m_likelihoodTestName = "Chi-squared";
+        m_likelihoodResultName = "Chi2/ndf";
         m_dataToFit = std::move(data);
         m_corrFunc = std::move(func);
     }

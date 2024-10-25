@@ -94,7 +94,7 @@ namespace JJCorrFitter
             }
         }
         std::cout << "----------------------------------\n";
-        std::cout << "Likelihood test: " << m_minimiser->MinValue() << "\n";
+        std::cout << m_likelyhoodTest->GetLikelihoodResultName() << ": " << m_minimiser->MinValue() << "\n";
         std::cout << "No. calls: " << m_minimiser->NCalls() << "\n";
         std::cout << "-----========================-----\n";
     }

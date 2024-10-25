@@ -30,7 +30,7 @@
 
                 std::unique_ptr<CorrelationFunctionImpl> m_corrFunc;
                 std::unique_ptr<TH1> m_dataToFit;
-                std::string_view m_likelihoodTestName;
+                std::string_view m_likelihoodTestName,m_likelihoodResultName;
 
                 std::vector<double> SortParameters(const double *x, const std::vector<std::size_t> &indexArray) const;
 
@@ -49,6 +49,7 @@
                 [[nodiscard]] std::unique_ptr<TH1> GetHistogram() noexcept;
                 [[nodiscard]] std::unique_ptr<TH1> GetCorrelationFunction() noexcept;
                 [[nodiscard]] std::string_view GetLikelihoodTestName() const noexcept;
+                [[nodiscard]] std::string_view GetLikelihoodResultName() const noexcept;
                 [[nodiscard]] std::string_view GetCorrelationFunctionName() const noexcept;
                 [[nodiscard]] std::string_view GetCorrelationSourceType() const noexcept;
                 [[nodiscard]] std::string_view GetCorrelationInteractionTermType() const noexcept;
@@ -59,6 +60,7 @@
             inline std::unique_ptr<TH1> LikelihoodImpl::GetHistogram() noexcept {return std::move(m_dataToFit);}
             inline std::unique_ptr<TH1> LikelihoodImpl::GetCorrelationFunction() noexcept {return std::move(m_corrFunc->GetCorrelationFunction());}
             inline std::string_view LikelihoodImpl::GetLikelihoodTestName() const noexcept {return m_likelihoodTestName;}
+            inline std::string_view LikelihoodImpl::GetLikelihoodResultName() const noexcept {return m_likelihoodResultName;}
             inline std::string_view LikelihoodImpl::GetCorrelationFunctionName() const noexcept {return m_corrFunc->GetFunctionName();}
             inline std::string_view LikelihoodImpl::GetCorrelationSourceType() const noexcept {return m_corrFunc->GetSourceType();}
             inline std::string_view LikelihoodImpl::GetCorrelationInteractionTermType() const noexcept {return m_corrFunc->GetInteractionTermType();}

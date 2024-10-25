@@ -74,7 +74,7 @@ namespace JJCorrFitter
         
         m_interactionTerm->SetMomentum(kStar);
 
-        auto kooninPratt = [&](double r, double ctheta){return 2 * ROOT::Math::Pi() * r * r * m_sourceFunction->GetValue(r) * (m_interactionTerm->GetValue(r,ctheta) - 1);};
+        auto kooninPratt = [&](double r, double ctheta){return 4 * r * r * m_sourceFunction->GetValue(r) * (m_interactionTerm->GetValue(r,ctheta));};
 
         auto f = [&](const double r){
             auto g = [&](const double ctheta){
@@ -85,7 +85,7 @@ namespace JJCorrFitter
 
         double error = 0.;
         double result = gauss_kronrod<double,61>::integrate(f,0.,std::numeric_limits<double>::infinity(),0,0,&error);
-        return std::make_pair(result + 1,error);
+        return std::make_pair(result,error);
     }
 
     void CorrelationFunction1D::SetBinning(const std::unique_ptr<TH1> &data, float minKstar, float maxKstar)

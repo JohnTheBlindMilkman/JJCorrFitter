@@ -5,6 +5,7 @@ namespace JJCorrFitter
     LogLikelihoodTest::LogLikelihoodTest(std::unique_ptr<TH1> &&data, std::unique_ptr<TH1> &&signal, std::unique_ptr<TH1> &&background, std::unique_ptr<CorrelationFunctionImpl> &&model)
     {
         m_likelihoodTestName = "Log-likelihood";
+        m_likelihoodResultName = "max log";
         m_dataToFit = std::move(data);
         m_dataSignal = std::move(signal);
         m_dataBackground = std::move(background);

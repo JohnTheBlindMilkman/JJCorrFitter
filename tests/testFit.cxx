@@ -16,20 +16,23 @@ int main()
 {
     using ParType = JJCorrFitter::Fitter::ParType;
 
-    TFile *itp = TFile::Open("/home/jedkol/Downloads/HADES/HADES-CrAP/output/1Dcorr_0_10_cent_forHAL.root");
-    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatKt2"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/HADES-CrAP/output/1Dcorr_0_10_cent_forHAL.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatY4"));
     //std::unique_ptr<TH1> signal(itp->Get<TH1D>("hQinvSignKt2"));
     //std::unique_ptr<TH1> background(itp->Get<TH1D>("hQinvBckgKt2"));
 
+    //std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/hist.root"));
+    //std::unique_ptr<TH1> hist(itp->Get<TH1D>("hist"));
+
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>(
         std::make_unique<JJCorrFitter::SourceFunction1D>(),
-        std::make_unique<JJCorrFitter::InteractionTermPhaseShift>()
+        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
         );
     func->SetBinning(hist,2,70);
 
     JJCorrFitter::Fitter fitter
     (
-        std::unique_ptr<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("GSLSimAn","")),
+        std::unique_ptr<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("Minuit2","Migrad")),
         std::make_unique<JJCorrFitter::ChiSquaredTest>(std::move(hist),std::move(func))
     );
 
@@ -37,7 +40,7 @@ int main()
     fitter.SetParameter(ParType::Generic,"Lambda",0.4,0.001,0.,1.);
     fitter.SetParameter(ParType::Source,"Rinv",2.,0.001,1.,6.);
 
-    fitter.SetPrintLevel(1);
+    fitter.SetPrintLevel(0);
     fitter.SetTolerance(1e-9);
 
     fitter.PrintInfo();

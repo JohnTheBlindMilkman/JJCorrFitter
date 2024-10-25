@@ -20,6 +20,6 @@ namespace JJCorrFitter
 
     double SourceFunction1D::GetValue(float rStar) const noexcept
     {
-        return pow(4 * ROOT::Math::Pi() * m_invariantRadius * m_invariantRadius,-1.5) * exp(-0.25*rStar*rStar/(m_invariantRadius*m_invariantRadius));
+        return /* std::pow(2 * ROOT::Math::Pi() * m_invariantRadius * m_invariantRadius,-1.5) * */ exp(-0.25 * rStar * rStar / (m_invariantRadius * m_invariantRadius));
     }
 } // namespace JJCorrFitter

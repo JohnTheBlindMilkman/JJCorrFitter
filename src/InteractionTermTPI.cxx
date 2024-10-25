@@ -66,16 +66,12 @@ namespace JJCorrFitter
         fPionac  = 57.63975274 / m_gevToFm;
         fTwospin = 1;
 
-        //    d0s.real() = 2.77 / m_gevToFm;
-        //    f0s.real() = 7.77 / m_gevToFm;
         fD0t = 1.7 / m_gevToFm;
         fF0t = -5.4 / m_gevToFm;
 
         // ESC08
         fF0s = 7.771 / m_gevToFm;
         fD0s = 2.754 / m_gevToFm;
-        //    f0t.real() = ? / m_gevToFm; no data from ESC08
-        //    d0t.real() = ? / m_gevToFm;
 
         fOneoveracsq = 1.0 / (fPionac * fPionac);
         fTwopioverac = 2.0 * ROOT::Math::Pi() / fPionac;
@@ -119,15 +115,8 @@ namespace JJCorrFitter
 
     double InteractionTermTPI::Gamow(double arg) const 
     {
-        //   if (arg<0.0001)
-        //     return 0.0;
-        //   if (arg > 0.4)
         long double eta = fTwopioverac / arg;
         return (eta) *1.0 / (exp(eta) - 1.0);
-        //   int bin = arg / 0.0002;
-        //   double b1 = bin*0.0002 + 0.0001;
-        //   double b2 = bin*0.0002 + 0.0003;
-        //   return ((gamov[bin+1] * (arg - b1) + gamov[bin] * (b2 - arg)) / 0.0002);
     }
 
     double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
@@ -145,11 +134,6 @@ namespace JJCorrFitter
         int ccase         = 0;
         int wavesign      = 1;
 
-        // Classical limit - if distance is larger than Coulomb radius,
-        // the interaction does not matter
-        //if (fabs(rStar) > fabs(fPionac)) 
-            //return (1.0 + wavesign*cos(2*tKstRst));
-
         // Classical limit - in the case of large k* we go to
         // classical coulomb interaction
         long double testp = rho * (1.0 + tKstRst / (rho));
@@ -160,7 +144,6 @@ namespace JJCorrFitter
         {
             double asym;
             asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
-            //      std::cout << "as1 " << asym << std::endl;
             asym = sqrt(asym);
             if (asym < 1.0)
                 ffminus.real(1.0 + (asym - 1.0) * 2.0);
@@ -170,7 +153,6 @@ namespace JJCorrFitter
             ffminus.imag(sqrt(asym * asym - ffminus.real() * ffminus.real()));
 
             asym = (1.0 - 1.0 / (rStar * (1.0 + tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
-            //      std::cout << "as2 " << asym << std::endl;
             asym = sqrt(asym);
             if (asym < 1.0)
                 ffplus.real(1.0 + (asym - 1.0) * 2.0);
@@ -277,10 +259,6 @@ namespace JJCorrFitter
         if ((ffminus.imag() > 2.0) || (ffminus.imag() < -2.0))
             std::cout << "FFminus Im wild !" << ffminus.imag() << " case " << ccase << std::endl;
 
-        //  coulqscpart = 0.5 * Gamow(kstar) * (modl2(ffplus) + modl2(ffminus));
-
-        //   return (0.5 * Gamow(kstar) *
-        //      (modl2(ffplus) + wavesign*sterm.real() + wavesign*tterm.real() + modl2(ffminus)));
         if (fTwospin == 1) 
         {
             wavesign            = 1;
@@ -290,14 +268,8 @@ namespace JJCorrFitter
             wavesign            = -1;
             smult               = 0;
             long double triplet = (0.5 * Gamow(kstar) * (2.0 * fgmodt * smult + norm(ffplus) + norm(ffminus) + wavesign * sterm.real() + wavesign * tterm.real() + smult * 2 * (fcgefht + fcgefgt)));
-            //    scmp = singlet;
-            //    tcmp = triplet;
-
-            //    ccmp = 0.5 * Gamow(kstar) * (modl2(ffplus) + modl2(ffminus));
-            //    gcmp = fgmod;
 
             return (0.25 * singlet + 0.75 * triplet);
-            //    return triplet;
         } 
         else
         {
@@ -374,12 +346,10 @@ namespace JJCorrFitter
             bnpu = 2 * eta * rho * bn - rho * rho * bnmu;
             bnpu /= (1.0 * iter + 1.0) * (1.0 * iter + 2.0);
             bsum += bnpu;
-            //    std::cout << "B E " << iter << " " << bnpu << std::endl;
 
             pnpu = 2 * eta * rho * pn - rho * rho * pnmu - (2.0 * iter + 1.0) * 2.0 * eta * rho * bn;
             pnpu /= (1.0 * iter) * (1.0 * iter + 1.0);
             psum += pnpu;
-            //    std::cout << "P E " << iter << " " << pnpu << std::endl;
 
             bnmu = bn;
             bn   = bnpu;
@@ -388,7 +358,6 @@ namespace JJCorrFitter
             pn   = pnpu;
             if ((fabs(pnmu) + fabs(bnmu) + fabs(bnpu) + fabs(pnpu)) < 1.0e-20) 
             {
-                //    std::cout << "iter " << iter << std::endl;
                 break;
             }
         }
@@ -408,11 +377,9 @@ namespace JJCorrFitter
         for (int iter = 1; iter < 1000000; iter++) 
         {
             element = ((1.0 * iter) * (1.0 * iter) + x2inv) * (1.0 * iter);
-            //    std::cout << "Element " << iter << " is " << element << std::endl;
             element = 1.0 / element;
             if (iter == 1) 
                 save = 1.0e-10 * element;
-            //    std::cout << "Element " << iter << " is " << element << std::endl;
 
             series += element;
             if (element < save) 
@@ -460,13 +427,10 @@ namespace JJCorrFitter
             double fasymminus = (1.0 - 1.0 / ((rStar - kstrst) * fPionac * fKStar * fKStar));
             return 0.5 * ((fasymplus + fasymminus) * cos(2 * kstrst) + (2.0 * sqrt(fasymplus * fasymminus)));
         }
-        //    return (1.0 - 1.0/(rStar*pionac*fKStar*fKStar))*(1.0+wavesign*cos(2*kstrst));
 
         std::complex<long double> ffplus, ffminus;
         // Check for the classical limit in both functions separately
-        if (((testp < 15.0) && (testm < 15.0)))  // ||
-                                                //       ((testp< 15.0) && (testm> 15.0) && (fabs(testp-testm < 1.0))) ||
-                                                //       ((testp> 15.0) && (testm< 15.0) && (fabs(testp-testm < 1.0))))
+        if (((testp < 15.0) && (testm < 15.0)))
         {
             // Calculate the F function
             GetFFdouble(rStar,cosTheta,ffplus, ffminus);
@@ -476,7 +440,6 @@ namespace JJCorrFitter
         {
             double asym;
             GetFFsingle(rStar,cosTheta,ffplus);
-            //      GetFFsingle(&ffminus,-1);
             asym =
                 (1.0 - 1.0 / (rStar * (1.0 - kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
@@ -491,7 +454,6 @@ namespace JJCorrFitter
         else 
         {
             double asym;
-            //      GetFFsingle(&ffplus);
             GetFFsingle(rStar,cosTheta,ffminus, -1);
             asym = (1.0 - 1.0 / (rStar * (1.0 + kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
