@@ -33,6 +33,7 @@
 
                 void SetParameters(const std::vector<double> &pars);
                 [[nodiscard]] double GetValue(float rStar) const noexcept;
+                [[nodiscard]] double GetValue(float rOut, float rSide, float rLong) const noexcept {std::cerr << "SourceFunction1D::GetValue - This is a deleted function" << std::endl; return 0;}
         };
 
     } // namespace JJCorrFitter

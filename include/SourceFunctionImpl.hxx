@@ -13,6 +13,7 @@
     #define SourceFunctionImpl_hxx
 
     #include <memory>
+    #include <iostream>
 
     #include "Math/Math.h"
 
@@ -37,6 +38,7 @@
 
                 virtual void SetParameters(const std::vector<double> &pars) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar) const noexcept = 0;
+                [[nodiscard]] virtual double GetValue(float rOut, float rSide, float rLong) const noexcept = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
                 [[nodiscard]] std::string_view GetSourceFunctionName() const noexcept;
         };

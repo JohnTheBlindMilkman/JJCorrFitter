@@ -73,6 +73,8 @@
                 void PrintInfo() const;
                 [[nodiscard]] std::unique_ptr<TH1> GetFitFunction() noexcept;
                 [[nodiscard]] std::unique_ptr<TH1> GetDataHistogram() noexcept;
+                [[nodiscard]] std::vector<double> GetFitParameterValues() const noexcept;
+                [[nodiscard]] std::vector<double> GetFitParameterErrors() const noexcept;
         };
 
         inline void Fitter::SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept {m_minimiser = std::move(minimiser);}
@@ -82,6 +84,8 @@
         inline void Fitter::SetPrintLevel(int lvl) {m_printLevel = lvl; m_minimiser->SetPrintLevel(m_printLevel);}
         inline std::unique_ptr<TH1> Fitter::GetFitFunction() noexcept {return std::move(m_likelyhoodTest->GetCorrelationFunction());}
         inline std::unique_ptr<TH1> Fitter::GetDataHistogram() noexcept {return std::move(m_likelyhoodTest->GetHistogram());}
+        inline std::vector<double> Fitter::GetFitParameterValues() const noexcept {return m_valuesAtMinimum;}
+        inline std::vector<double> Fitter::GetFitParameterErrors() const noexcept {return m_errorsAtMinimum;}
 
     } // namespace JJCorrFitter
 

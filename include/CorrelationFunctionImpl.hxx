@@ -31,7 +31,7 @@
                 std::size_t m_numberOfParams, m_totalNumberOfParams;
                 std::unique_ptr<SourceFunctionImpl> m_sourceFunction;
                 std::unique_ptr<InteractionTermImpl> m_interactionTerm;
-                std::vector<double> m_corrFuncParams, m_sourceFunctionParams, m_interactionTermParams, m_correlationPoints, m_correlationErrors;
+                std::vector<double> m_corrFuncParams, m_sourceFunctionParams, m_interactionTermParams;
                 std::string_view m_correlationFunctionName;
 
                 virtual void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors) = 0;

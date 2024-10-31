@@ -46,6 +46,7 @@ add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-s
 set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/ChiSquaredTest.cxx
     ${PROJECT_SOURCE_DIR}/src/CorrelationFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/CorrelationFunction3D.cxx
     ${PROJECT_SOURCE_DIR}/src/Fitter.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermSchrodinger.cxx
     ${PROJECT_SOURCE_DIR}/src/InteractionTermPhaseShift.cxx
@@ -53,11 +54,13 @@ set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/LikelihoodImpl.cxx
     ${PROJECT_SOURCE_DIR}/src/LogLikelihoodTest.cxx
     ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/SourceFunction3D.cxx
 )
 set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/ChiSquaredTest.hxx
     ${PROJECT_SOURCE_DIR}/include/Config.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunction1D.hxx
+    ${PROJECT_SOURCE_DIR}/include/CorrelationFunction3D.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunctionImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/Fitter.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
@@ -67,6 +70,7 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/LikelihoodImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/LogLikelihoodTest.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunction1D.hxx
+    ${PROJECT_SOURCE_DIR}/include/SourceFunction3D.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )
 
@@ -99,7 +103,7 @@ target_include_directories(
 ) 
 
 target_link_libraries(JJCorrFitter 
-    ${ROOT_LIBRARIES} 
+    ${ROOT_LIBRARIES}
     GSL::gsl 
     GSL::gslcblas
     ${Boost_LIBRARIES}

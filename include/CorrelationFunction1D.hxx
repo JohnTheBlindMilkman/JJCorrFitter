@@ -32,6 +32,7 @@
                 int m_nPoints;
                 std::string m_histogramName, m_histogramTitle;
                 std::vector<float> m_kStarValues;
+                std::vector<double> m_correlationPoints, m_correlationErrors;
 
                 [[nodiscard]] std::unique_ptr<TH1D> MakeHistogram(const std::vector<double> &points, const std::vector<double> &errors, const std::vector<double> &params);
                 [[nodiscard]] std::vector<float> SetKStarPoints(float start, float stop, int nPoints);

@@ -32,6 +32,7 @@
                 SourceFunction3D& operator=(SourceFunction3D&&) noexcept = default;
 
                 void SetParameters(const std::vector<double> &pars);
+                [[nodiscard]] double GetValue(float rStar) const noexcept {std::cerr << "SourceFunction3D::GetValue - This is a deleted function" << std::endl; return 0;}
                 [[nodiscard]] double GetValue(float rOut, float rSide, float rLong) const noexcept;
         };
 

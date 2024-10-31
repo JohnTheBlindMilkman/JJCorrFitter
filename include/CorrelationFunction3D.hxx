@@ -14,7 +14,7 @@
 
     #include "Math/IntegratorMultiDim.h"
     #include "Math/Integrator.h"
-    #include "TH1D.h"
+    #include "TH3D.h"
 
     #include "gsl/gsl_sf_legendre.h"
 
@@ -31,13 +31,17 @@
                 float m_minKStar,m_maxKStar;
                 int m_nPoints;
                 std::string m_histogramName, m_histogramTitle;
-                std::vector<float> m_kStarValues;
+                std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > m_kStarValues;
+                std::vector<std::vector<std::vector<double> > > m_correlationPoints, m_correlationErrors;
 
-                [[nodiscard]] std::unique_ptr<TH1D> MakeHistogram(const std::vector<double> &points, const std::vector<double> &errors, const std::vector<double> &params);
-                [[nodiscard]] std::vector<float> SetKStarPoints(float start, float stop, int nPoints);
-                void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors);
+                [[nodiscard]] std::unique_ptr<TH3D> MakeHistogram(const std::vector<std::vector<std::vector<double> > > &points, const std::vector<std::vector<std::vector<double> > > &errors, const std::vector<double> &params);
+                [[nodiscard]] std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > SetKStarPoints(float start, float stop, int nPoints);
+                void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors) {}
+                void NormaliseFunction(std::vector<std::vector<std::vector<double> > > &points, std::vector<std::vector<std::vector<double> > > &errors);
                 [[nodiscard]] std::pair<double,double> CalculatePoint();
-                [[nodiscard]] std::pair<double,double> CalculatePoint(float kStar);
+                [[nodiscard]] std::pair<double,double> CalculatePoint(float kOut,float kSide,float kLong);
+                [[nodiscard]] constexpr double CalculateCosTheta(float kOut,float kSide,float kLong, float rOut,float rSide,float rLong) noexcept;
+                [[nodiscard]] constexpr double CalculateModulus(float xOut,float xSide,float xLong) noexcept;
 
             public:
                 CorrelationFunction3D(/* args */) = delete;
