@@ -33,14 +33,14 @@
                  * @param ffp
                  * @param sign
                  */
-                void GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign = 1) const;
+                constexpr void GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign = 1) const;
                 /**
                  * Calculates the confluent hypergeometric function for two orientations of cos(theta*) for symmetrized wave-function
                  * (identical particles)
                  * @param ffp
                  * @param ffm
                  */
-                void GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const;
+                constexpr void GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const;
                 /**
                  * Calculates G~ function
                  * @param eta
@@ -48,30 +48,31 @@
                  * @param hfun
                  * @return
                  */
-                std::complex<long double> GetG(long double eta, long double rho, long double hfun) const;
-                long double Chiim(long double eta) const;
+                constexpr std::complex<long double> GetG(long double eta, long double rho, long double hfun) const;
+                constexpr long double Chiim(long double eta) const;
                 /**
                  * Calculates H function for strong interaction
                  * @param eta
                  * @return
                  */
-                long double GetH(long double eta) const;
-                void Getfc(long double kstar, long double eta, long double hfun, std::complex<long double> &fcs, std::complex<long double> &fct) const;  // TODO
-                void Bfunpfun(long double eta, long double rho, long double &bret, long double &pret) const;
-                double Funeh(double xarg, double rad, double alfa) const;
-                double Funex(double xarg, double rad) const;
-                void InitializeGamow();
-                double Gamow(double arg) const;
-                double GetQuantumCoulombStrong(float rStar, float cosTheta);
+                constexpr long double GetH(long double eta) const;
+                constexpr void Getfc(long double kstar, long double eta, long double hfun, std::complex<long double> &fcs, std::complex<long double> &fct) const;  // TODO
+                constexpr std::pair<long double,long double> Bfunpfun(long double eta, long double rho) const;
+                constexpr double Funeh(double xarg, double rad, double alfa) const;
+                constexpr double Funex(double xarg, double rad) const;
+                constexpr void InitializeGamow();
+                constexpr double Gamow(double arg) const;
+                constexpr double GetQuantumCoulombStrong(float rStar, float cosTheta);
                 /**
                  * @brief Calculates weight for identical bosons
                  * 
                  * @return double
                  */
-                double GetQuantumCoulomb(float rStar, float cosTheta);
+                constexpr double GetQuantumCoulomb(float rStar, float cosTheta);
 
                 static constexpr float m_gevToFm{0.197327};
                 static constexpr float m_mevToGev{0.001};
+                static constexpr double m_pi{3.141592653589793238};
 
                 SpinState m_spinState;
                 std::complex<long double> fD0s, fF0s, fD0t, fF0t;
@@ -93,9 +94,9 @@
                 [[nodiscard]] double GetValue(float rStar, float cosTheta);
         };
 
-        inline long double InteractionTermTPI::Chiim(long double eta) const { return Gamow(1.0 / (eta * fPionac)) / (2.0 * eta); }
-        inline double InteractionTermTPI::Funeh(double xarg, double rad, double alfa) const { return exp(-sqrt(xarg * xarg / (rad * rad) + alfa * alfa)); }
-        inline double InteractionTermTPI::Funex(double xarg, double rad) const { return exp(-xarg / rad); }
+        inline constexpr long double InteractionTermTPI::Chiim(long double eta) const { return Gamow(1.0 / (eta * fPionac)) / (2.0 * eta); }
+        inline constexpr double InteractionTermTPI::Funeh(double xarg, double rad, double alfa) const { return exp(-sqrt(xarg * xarg / (rad * rad) + alfa * alfa)); }
+        inline constexpr double InteractionTermTPI::Funex(double xarg, double rad) const { return exp(-xarg / rad); }
 
     } // namespace JJCorrFitter
     

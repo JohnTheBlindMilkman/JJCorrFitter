@@ -55,7 +55,7 @@ namespace JJCorrFitter
         m_InteractionTermName = "p-p Lednicky-Lyuboshitz (TPI)";
     }
 
-    void InteractionTermTPI::InitializeGamow() 
+    constexpr void InteractionTermTPI::InitializeGamow() 
     {
         using namespace std::complex_literals;
 
@@ -66,15 +66,15 @@ namespace JJCorrFitter
         fPionac  = 57.63975274 / m_gevToFm;
         fTwospin = 1;
 
-        fD0t = 1.7 / m_gevToFm;
-        fF0t = -5.4 / m_gevToFm;
+        fD0t = {1.7 / m_gevToFm, 0.};
+        fF0t = {-5.4 / m_gevToFm, 0.};
 
         // ESC08
-        fF0s = 7.771 / m_gevToFm;
-        fD0s = 2.754 / m_gevToFm;
+        fF0s = {7.771 / m_gevToFm, 0.};
+        fD0s = {2.754 / m_gevToFm, 0.};
 
         fOneoveracsq = 1.0 / (fPionac * fPionac);
-        fTwopioverac = 2.0 * ROOT::Math::Pi() / fPionac;
+        fTwopioverac = 2.0 * m_pi / fPionac;
     }
 
     void InteractionTermTPI::SetParameters(const std::vector<double> &pars)
@@ -113,13 +113,13 @@ namespace JJCorrFitter
         return GetQuantumCoulombStrong(rStar / m_gevToFm,cosTheta);
     }
 
-    double InteractionTermTPI::Gamow(double arg) const 
+    constexpr double InteractionTermTPI::Gamow(double arg) const 
     {
         long double eta = fTwopioverac / arg;
         return (eta) *1.0 / (exp(eta) - 1.0);
     }
 
-    double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
+    constexpr double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
     {
         if (rStar < 0.0000000001)
             return 1.0;
@@ -142,8 +142,7 @@ namespace JJCorrFitter
         std::complex<long double> ffplus, ffminus;
         if ((testp > 15.0) && (testm > 15.0)) 
         {
-            double asym;
-            asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
+            double asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
             asym = sqrt(asym);
             if (asym < 1.0)
                 ffminus.real(1.0 + (asym - 1.0) * 2.0);
@@ -170,12 +169,11 @@ namespace JJCorrFitter
         } 
         else if (testp < 15.0) 
         {
-            double asym;
             GetFFsingle(rStar,cosTheta,ffplus, 1);
             GetFFsingle(rStar,cosTheta,ffminus, -1);
             if ((fabs(ffminus.real()) > 2.0) || fabs(ffminus.imag()) > 2.0) 
             {
-                asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
+                double asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
                 asym = sqrt(asym);
                 if (asym < 1.0)
                     ffminus.real(1.0 + (asym - 1.0) * 2.0);
@@ -188,12 +186,11 @@ namespace JJCorrFitter
         }
         else 
         {
-            double asym;
             GetFFsingle(rStar,cosTheta,ffminus, -1);
             GetFFsingle(rStar,cosTheta,ffplus, 1);
             if ((fabs(ffplus.real()) > 2.0) || fabs(ffplus.imag()) > 2.0) 
             {
-                asym = (1.0 - 1.0 / (rStar * (1.0 + tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
+                double asym = (1.0 - 1.0 / (rStar * (1.0 + tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
                 asym = sqrt(asym);
                 if (asym < 1.0)
                     ffplus.real(1.0 + (asym - 1.0) * 2.0);
@@ -278,21 +275,21 @@ namespace JJCorrFitter
         
     }
 
-    std::complex<long double> InteractionTermTPI::GetG(long double eta, long double rho, long double hfun) const 
+    constexpr std::complex<long double> InteractionTermTPI::GetG(long double eta, long double rho, long double hfun) const 
     {
         std::complex<long double> gtemp;
-        long double bres, pres;
-        long double bmult;
+        
+        std::pair<long double,long double> tmp = Bfunpfun(eta, rho);
+        long double bres = tmp.first, pres = tmp.second;
 
-        Bfunpfun(eta, rho, bres, pres);
-        bmult = 2.0 * eta * rho * bres;
+        long double bmult = 2.0 * eta * rho * bres;
 
         gtemp = {pres + bmult * (log(fabs(2.0 * eta * rho)) + 2.0 * fEuler - 1.0 + hfun), bmult * Chiim(eta)};
 
         return gtemp;
     }
 
-    void InteractionTermTPI::Getfc(long double kstar, long double eta, long double hfun, std::complex<long double> &fcs, std::complex<long double> &fct) const 
+    constexpr void InteractionTermTPI::Getfc(long double kstar, long double eta, long double hfun, std::complex<long double> &fcs, std::complex<long double> &fct) const 
     {
         std::complex<long double> ci;
         std::complex<long double> cia;
@@ -305,8 +302,8 @@ namespace JJCorrFitter
         std::complex<long double> dit;
         std::complex<long double> fcinvt;
 
-        ci = {hfun,Chiim(eta)};
-        cia   = ci * static_cast<long double>(2.0 / fPionac);
+        ci = {hfun * 2.0 / fPionac,Chiim(eta)};
+        //cia   = ci * static_cast<long double>(2.0 / fPionac);
 
         fis       = static_cast<long double>(1.) / fF0s;
         dis       = fD0s * static_cast<long double>(0.5 * kstar * kstar);
@@ -319,28 +316,26 @@ namespace JJCorrFitter
         fct       = static_cast<long double>(1.) / fcinvt;
     }
 
-    void InteractionTermTPI::Bfunpfun(long double eta, long double rho, long double& bret, long double& pret) const 
+    constexpr std::pair<long double,long double> InteractionTermTPI::Bfunpfun(long double eta, long double rho) const 
     {
         long double b0   = 1;
         long double b1   = eta * rho;
         long double bsum = b0 + b1;
-        long double bnpu, bn, bnmu;
+        long double bnpu = 0;
         long double p0   = 1.0;
         long double p1   = 0.0;
         long double psum = p0 + p1;
-        long double pnpu, pn, pnmu;
+        long double pnpu = 0;
 
-        if (rho > ROOT::Math::Pi() * 4.0) 
+        if (rho > m_pi * 4.0) 
         {
-            bret = sin(rho) / rho;
-            pret = cos(rho);
-            return;
+            return std::make_pair(sin(rho) / rho,cos(rho));
         }
 
-        bn   = b1;
-        bnmu = b0;
-        pn   = p1;
-        pnmu = p0;
+        long double bn   = b1;
+        long double bnmu = b0;
+        long double pn   = p1;
+        long double pnmu = p0;
         for (int iter = 1; iter < 100000; iter++) 
         {
             bnpu = 2 * eta * rho * bn - rho * rho * bnmu;
@@ -362,12 +357,10 @@ namespace JJCorrFitter
             }
         }
 
-
-        bret = bsum;
-        pret = psum;
+        return std::make_pair(bsum,psum);
     }
 
-    long double InteractionTermTPI::GetH(long double eta) const 
+    constexpr long double InteractionTermTPI::GetH(long double eta) const 
     {
         long double etasum = log(1.0 / eta) - fEuler;
         long double series = 0.0;
@@ -391,7 +384,7 @@ namespace JJCorrFitter
         return etasum;
     }
 
-    double InteractionTermTPI::GetQuantumCoulomb(float rStar, float cosTheta) 
+    constexpr double InteractionTermTPI::GetQuantumCoulomb(float rStar, float cosTheta) 
     {
         if (rStar < 0.0000000001) 
             return 1.0;
@@ -500,7 +493,7 @@ namespace JJCorrFitter
         return (0.5 * Gamow(fabs(fKStar)) * (norm(ffplus) + wavesign * sterm.real() + wavesign * tterm.real() + norm(ffminus)));
     }
 
-    void InteractionTermTPI::GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
+    constexpr void InteractionTermTPI::GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
     {
         std::vector<long double> comprep(fCoulombSteps,0);
         std::vector<long double> compimp(fCoulombSteps,0);
@@ -582,7 +575,7 @@ namespace JJCorrFitter
         ffm = {comprem[nsteps - 1], compimm[nsteps - 1]};
     }
 
-    void InteractionTermTPI::GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign) const 
+    constexpr void InteractionTermTPI::GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign) const 
     {
         std::vector<double> comprep(fCoulombSteps,0);
         std::vector<double> compimp(fCoulombSteps,0);

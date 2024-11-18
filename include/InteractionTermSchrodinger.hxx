@@ -21,7 +21,7 @@
         class InteractionTermSchrodinger : public InteractionTermImpl
         {
             private:
-                std::unique_ptr<CWaveFunction> m_waveFunction;
+                CWaveFunction_pp_schrod m_waveFunction;
                 const std::string m_coralParFile{"./wfparameters.dat"};
                 static constexpr int m_kStarMin{0};
                 static constexpr int m_gevToMev{1000};

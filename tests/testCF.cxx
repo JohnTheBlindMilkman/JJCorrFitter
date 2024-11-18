@@ -1,5 +1,4 @@
 #include "TFile.h"
-#include "Fitter.hxx"
 #include "CorrelationFunction1D.hxx"
 #include "CorrelationFunction3D.hxx"
 #include "SourceFunction1D.hxx"
@@ -7,21 +6,20 @@
 #include "InteractionTermSchrodinger.hxx"
 #include "InteractionTermPhaseShift.hxx"
 #include "InteractionTermTPI.hxx"
-#include "ChiSquaredTest.hxx"
-#include "TH3D.h"
 
 int main()
 {
-    std::unique_ptr<TFile> otp(TFile::Open("draw3DCF.root","recreate"));
+    //std::unique_ptr<TFile> otp(TFile::Open("draw1DCF.root","recreate"));
 
-    JJCorrFitter::CorrelationFunction3D func(
-        std::make_unique<JJCorrFitter::SourceFunction3D>(),
-        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
+    JJCorrFitter::CorrelationFunction1D func(
+        std::make_unique<JJCorrFitter::SourceFunction1D>(),
+        std::make_unique<JJCorrFitter::InteractionTermTPI>(JJCorrFitter::InteractionTermTPI::SpinState::None)
         );
 
-    func.SetBinning("hCF","",200,2,200);
-    func.SetParameters({1,1.},{2.,2.,2.},{});
-    func.Evaluate()->Write();
+    func.SetBinning("hCF","",200,10,200);
+    func.SetParameters({1,1.},{2.},{});
+    func.Evaluate();
 
-    otp->Close();
+    /* otp->Save();
+    otp->Close(); */
 }

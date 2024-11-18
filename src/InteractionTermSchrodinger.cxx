@@ -3,27 +3,27 @@
 namespace JJCorrFitter
 {
     InteractionTermSchrodinger::InteractionTermSchrodinger() : 
-    m_waveFunction(new CWaveFunction_pp_schrod("./wfparameters.dat")), m_kStar(5.)
+    m_waveFunction("./wfparameters.dat"), m_kStar(5.)
     {
         m_InteractionTermName = "p-p Schroedinger solution (CorAL)";
         m_numberOfParams = 0;
-        m_nqMax = m_waveFunction->GetNQMAX();
+        m_nqMax = m_waveFunction.GetNQMAX();
     }
 
     InteractionTermSchrodinger::~InteractionTermSchrodinger()
     {}
 
-    InteractionTermSchrodinger::InteractionTermSchrodinger(InteractionTermSchrodinger &&other) noexcept
+    InteractionTermSchrodinger::InteractionTermSchrodinger(InteractionTermSchrodinger &&other) noexcept : m_waveFunction(std::move(other.m_waveFunction))
     {
-        m_waveFunction = std::move(other.m_waveFunction);
-        other.m_waveFunction = nullptr;
+        //m_waveFunction = std::move(other.m_waveFunction);
+        //other.m_waveFunction = nullptr;
         m_nqMax = std::move(other.m_nqMax);
     }
 
     InteractionTermSchrodinger& InteractionTermSchrodinger::operator=(InteractionTermSchrodinger &&other) noexcept
     {
         m_waveFunction = std::move(other.m_waveFunction);
-        other.m_waveFunction = nullptr;
+        //other.m_waveFunction = nullptr;
         m_nqMax = std::move(other.m_nqMax);
 
         return *this;
@@ -44,7 +44,7 @@ namespace JJCorrFitter
     
     double InteractionTermSchrodinger::GetValue(float rStar, float cosTheta)
     {
-        return m_waveFunction->GetPsiSquared(m_kStar,rStar,cosTheta);
+        return m_waveFunction.GetPsiSquared(m_kStar,rStar,cosTheta);
     }
 
 } // namespace JJCorrFitter
