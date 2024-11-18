@@ -79,7 +79,7 @@ set(HEADER_FILES
 
 # creates our fitter library
 add_library(JJCorrFitter SHARED ${SRC_FILES} ${HEADER_FILES})
-target_compile_features(JJCorrFitter PRIVATE cxx_std_17)
+target_compile_features(JJCorrFitter PRIVATE cxx_std_20)
 
 
 #sets different include destinations depending on if building or installing 

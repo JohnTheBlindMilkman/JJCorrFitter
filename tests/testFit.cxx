@@ -17,8 +17,8 @@ int main()
     using ParType = JJCorrFitter::Fitter::ParType;
 
     // load data
-    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/HADES-CrAP/output/1Dcorr_50_60_cent_forHAL.root"));
-    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatY4"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/HADES-CrAP/output/1Dcorr_0_10_cent_forHAL.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatKt2"));
 
     // create CF object
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>
@@ -26,7 +26,7 @@ int main()
         std::make_unique<JJCorrFitter::SourceFunction1D>(),
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
-    func->SetBinning(hist,2,70);
+    func->SetBinning(hist,2,120);
 
     // create fitter object
     JJCorrFitter::Fitter fitter
@@ -65,5 +65,6 @@ int main()
     hist->Write();
     cf->Write();
 
+    otp->Save();
     otp->Close();
 }

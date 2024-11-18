@@ -18,7 +18,6 @@ namespace JJCorrFitter
     fTwospin(0),
     fWritegrps(0),
     fPcount(0),
-    fCoulombSteps(170),
     fRStarOutS(0),
     fRStarSideS(0),
     fRStarLongS(0),
@@ -111,12 +110,6 @@ namespace JJCorrFitter
     double InteractionTermTPI::GetValue(float rStar, float cosTheta)
     {
         return GetQuantumCoulombStrong(rStar / m_gevToFm,cosTheta);
-    }
-
-    constexpr double InteractionTermTPI::Gamow(double arg) const 
-    {
-        long double eta = fTwopioverac / arg;
-        return (eta) *1.0 / (exp(eta) - 1.0);
     }
 
     constexpr double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
@@ -365,8 +358,8 @@ namespace JJCorrFitter
         long double etasum = log(1.0 / eta) - fEuler;
         long double series = 0.0;
         long double x2inv  = (eta * eta);
-        long double element;
-        long double save;
+        long double element = 0;
+        long double save = 0;
         for (int iter = 1; iter < 1000000; iter++) 
         {
             element = ((1.0 * iter) * (1.0 * iter) + x2inv) * (1.0 * iter);
@@ -431,9 +424,8 @@ namespace JJCorrFitter
         } 
         else if (testp < 15.0) 
         {
-            double asym;
             GetFFsingle(rStar,cosTheta,ffplus);
-            asym =
+            double asym =
                 (1.0 - 1.0 / (rStar * (1.0 - kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
             if (asym < 1.0)
@@ -446,9 +438,8 @@ namespace JJCorrFitter
         } 
         else 
         {
-            double asym;
             GetFFsingle(rStar,cosTheta,ffminus, -1);
-            asym = (1.0 - 1.0 / (rStar * (1.0 + kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
+            double asym = (1.0 - 1.0 / (rStar * (1.0 + kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
             asym = sqrt(asym);
             if (asym < 1.0)
                 ffplus.real(1.0 + (asym - 1.0) * 2.0);
@@ -495,14 +486,14 @@ namespace JJCorrFitter
 
     constexpr void InteractionTermTPI::GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
     {
-        std::vector<long double> comprep(fCoulombSteps,0);
-        std::vector<long double> compimp(fCoulombSteps,0);
-        std::vector<long double> comprem(fCoulombSteps,0);
-        std::vector<long double> compimm(fCoulombSteps,0);
-        long double eta, ksip, ksim;
+        std::array<long double,fCoulombSteps> comprep{0};
+        std::array<long double,fCoulombSteps> compimp{0};
+        std::array<long double,fCoulombSteps> comprem{0};
+        std::array<long double,fCoulombSteps> compimm{0};
+        long double eta = 0, ksip = 0, ksim = 0;
         std::complex<long double> alfa, zetp, zetm;
 
-        int nsteps;
+        int nsteps = 0;
 
         long double kstar  = fabs(fKStar);
 
@@ -519,7 +510,7 @@ namespace JJCorrFitter
         alfa = {0.0,-eta};
 
         std::complex<long double> fcomp, scompp, scompm;
-        long double tcomp;
+        long double tcomp = 0;
         std::complex<long double> sump, summ;
         std::complex<long double> fcmult;
 
@@ -577,12 +568,12 @@ namespace JJCorrFitter
 
     constexpr void InteractionTermTPI::GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign) const 
     {
-        std::vector<double> comprep(fCoulombSteps,0);
-        std::vector<double> compimp(fCoulombSteps,0);
-        double eta, ksip;
+        std::array<double,fCoulombSteps> comprep{0};
+        std::array<double,fCoulombSteps> compimp{0};
+        double eta = 0, ksip = 0;
         std::complex<long double> alfa, zetp;
 
-        int nsteps;
+        int nsteps = 0;
 
         double kstar  = fabs(fKStar);
 
@@ -599,7 +590,7 @@ namespace JJCorrFitter
         alfa = {0.0,-eta};
 
         std::complex<long double> fcomp, scompp;
-        long double tcomp;
+        long double tcomp = 0;
         std::complex<long double> sump;
         std::complex<long double> fcmult;
 

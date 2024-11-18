@@ -73,11 +73,12 @@
                 static constexpr float m_gevToFm{0.197327};
                 static constexpr float m_mevToGev{0.001};
                 static constexpr double m_pi{3.141592653589793238};
+                static constexpr int fCoulombSteps{170};
 
                 SpinState m_spinState;
                 std::complex<long double> fD0s, fF0s, fD0t, fF0t;
                 long double fPionac, fOneoveracsq, fTwopioverac, fCoulqscpart, fEuler, fF0, fD0;
-                int fTwospin, fWritegrps, fPcount, fCoulombSteps;
+                int fTwospin, fWritegrps, fPcount;
                 double m_kStar, fRStarOutS, fRStarSideS, fRStarLongS, fRStarS, fRStarOut, fRStarSide, fRStarLong, fRStar, fKStarOut, fKStarSide, fKStarLong, fKStar;
 
             public:
@@ -93,7 +94,12 @@
                 void SetMomentum(float kStar);
                 [[nodiscard]] double GetValue(float rStar, float cosTheta);
         };
-
+        
+        inline constexpr double InteractionTermTPI::Gamow(double arg) const 
+        {
+            long double eta = fTwopioverac / arg;
+            return (eta) *1.0 / (exp(eta) - 1.0);
+        }
         inline constexpr long double InteractionTermTPI::Chiim(long double eta) const { return Gamow(1.0 / (eta * fPionac)) / (2.0 * eta); }
         inline constexpr double InteractionTermTPI::Funeh(double xarg, double rad, double alfa) const { return exp(-sqrt(xarg * xarg / (rad * rad) + alfa * alfa)); }
         inline constexpr double InteractionTermTPI::Funex(double xarg, double rad) const { return exp(-xarg / rad); }
