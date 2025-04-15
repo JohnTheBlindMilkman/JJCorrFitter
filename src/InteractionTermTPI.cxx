@@ -104,7 +104,7 @@ namespace JJCorrFitter
 
     void InteractionTermTPI::SetMomentum(float kStar)
     {
-        fKStar = kStar * m_mevToGev;
+        fKStar = kStar * m_mevToGev * 2;
     }
     
     double InteractionTermTPI::GetValue(float rStar, float cosTheta)

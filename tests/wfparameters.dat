@@ -3,5 +3,5 @@ double DELQ 1.0
 double EPSILON 0.5
 int KLMAX 6
 double DELR 0.5
-int NRMAX 150
+int NRMAX 500
 bool IDENTICAL true

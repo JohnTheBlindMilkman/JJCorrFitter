@@ -6,7 +6,7 @@ project(
 )
 
 # find necessary packages
-find_package(ROOT 6.26 CONFIG REQUIRED)
+find_package(ROOT REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Boost REQUIRED)
 
@@ -54,6 +54,8 @@ set(SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/LikelihoodImpl.cxx
     ${PROJECT_SOURCE_DIR}/src/LogLikelihoodTest.cxx
     ${PROJECT_SOURCE_DIR}/src/SourceFunction1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/CauchySource1D.cxx
+    ${PROJECT_SOURCE_DIR}/src/DoubleGaussian1D.cxx
     ${PROJECT_SOURCE_DIR}/src/SourceFunction3D.cxx
 )
 set(HEADER_FILES
@@ -70,6 +72,8 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/LikelihoodImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/LogLikelihoodTest.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunction1D.hxx
+    ${PROJECT_SOURCE_DIR}/include/CauchySource1D.hxx
+    ${PROJECT_SOURCE_DIR}/include/DoubleGaussian1D.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunction3D.hxx
     ${PROJECT_SOURCE_DIR}/include/SourceFunctionImpl.hxx
 )

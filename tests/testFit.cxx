@@ -1,6 +1,7 @@
 #include "Fitter.hxx"
 #include "CorrelationFunction1D.hxx"
 #include "SourceFunction1D.hxx"
+#include "DoubleGaussian1D.hxx"
 #include "InteractionTermSchrodinger.hxx"
 #include "InteractionTermPhaseShift.hxx"
 #include "InteractionTermTPI.hxx"
@@ -24,9 +25,10 @@ int main()
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>
     (
         std::make_unique<JJCorrFitter::SourceFunction1D>(),
+        //std::make_unique<JJCorrFitter::InteractionTermTPI>(JJCorrFitter::InteractionTermTPI::SpinState::None)
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
-    func->SetBinning(hist,2,120);
+    func->SetBinning(hist,4,100);
 
     // create fitter object
     JJCorrFitter::Fitter fitter
@@ -36,9 +38,10 @@ int main()
     );
 
     // set parameters with limits
-    fitter.SetParameter(ParType::Generic,"N",1.);
+    fitter.SetParameter(ParType::Generic,"N",1.,0.001,0.95,1.05);
     fitter.SetParameter(ParType::Generic,"Lambda",0.4,0.001,0.,1.);
-    fitter.SetParameter(ParType::Source,"Rinv",2.,0.001,0.5,6.);
+    fitter.SetParameter(ParType::Source,"Rinv1",3.5,0.001,0.5,6.);
+    //fitter.SetParameter(ParType::Source,"Rinv2",3.5,0.001,0.5,6.);
 
     // set fit tolerance and ROOT::Minimizer print level
     fitter.SetPrintLevel(0);
