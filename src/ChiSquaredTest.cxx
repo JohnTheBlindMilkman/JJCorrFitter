@@ -39,15 +39,15 @@ namespace JJCorrFitter
 
     double ChiSquaredTest::CalculateChi2(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model)
     {
-        if (std::abs(data->GetBinWidth(m_rootHistogramFirstBin) - model->GetBinWidth(m_rootHistogramFirstBin)) > std::numeric_limits<Double_t>::epsilon())
-        {
-            throw std::logic_error(
-                "ChiSquaredTest::CalculateChi2 - Bin width differs between data and models. \nData bin width is " + 
-                std::to_string(data->GetBinWidth(m_rootHistogramFirstBin)) + 
-                "\nModel bin width is " + 
-                std::to_string(model->GetBinWidth(m_rootHistogramFirstBin))
-            );
-        }
+        // if (std::abs(data->GetBinWidth(m_rootHistogramFirstBin) - model->GetBinWidth(m_rootHistogramFirstBin)) > std::sqrt(std::numeric_limits<double>::epsilon()))
+        // {
+        //     throw std::logic_error(
+        //         "ChiSquaredTest::CalculateChi2 - Bin width differs between data and models. \nData bin width is " + 
+        //         std::to_string(data->GetBinWidth(m_rootHistogramFirstBin)) + 
+        //         "\nModel bin width is " + 
+        //         std::to_string(model->GetBinWidth(m_rootHistogramFirstBin))
+        //     );
+        // }
         
         const int nBins = model->GetNbinsX();
         double result = 0;

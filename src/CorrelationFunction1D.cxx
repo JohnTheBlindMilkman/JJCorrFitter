@@ -74,6 +74,7 @@ namespace JJCorrFitter
         
         m_interactionTerm->SetMomentum(kStar);
 
+        // TPI calculates wrong becasue of the 4 * pi * r * r factor!
         auto kooninPratt = [&](double r, double ctheta){return 4 * r * r * m_sourceFunction->GetValue(r) * (m_interactionTerm->GetValue(r,ctheta));};
 
         auto f = [&](const double r){

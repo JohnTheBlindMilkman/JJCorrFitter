@@ -65,6 +65,7 @@
                 void SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept;
                 void SetGoodnessTest(std::unique_ptr<LikelihoodImpl> &&test) noexcept;
                 void SetMaxFunctionCalls(unsigned int maxCalls);
+                void SetMaxIterations(unsigned maxIters) noexcept;
                 void SetTolerance(double tol);
                 void SetPrintLevel(int lvl);
                 void SetParameter(ParType type, const std::string &name, float start, float step, float min, float max);
@@ -80,6 +81,7 @@
         inline void Fitter::SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept {m_minimiser = std::move(minimiser);}
         inline void Fitter::SetGoodnessTest(std::unique_ptr<LikelihoodImpl> &&test) noexcept {m_likelyhoodTest = std::move(test);}
         inline void Fitter::SetMaxFunctionCalls(unsigned int maxCalls) {m_maxFunctionCalls = maxCalls; m_minimiser->SetMaxFunctionCalls(m_maxFunctionCalls);}
+        inline void Fitter::SetMaxIterations(unsigned maxIters) noexcept {m_minimiser->SetMaxIterations(maxIters);}
         inline void Fitter::SetTolerance(double tol) {m_tolerance = tol; m_minimiser->SetTolerance(m_tolerance);}
         inline void Fitter::SetPrintLevel(int lvl) {m_printLevel = lvl; m_minimiser->SetPrintLevel(m_printLevel);}
         inline std::unique_ptr<TH1> Fitter::GetFitFunction() noexcept {return std::move(m_likelyhoodTest->GetCorrelationFunction());}

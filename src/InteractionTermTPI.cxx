@@ -59,18 +59,18 @@ namespace JJCorrFitter
         using namespace std::complex_literals;
 
         fEuler = 0.577215665;
-        fF0    = 7.77 / m_gevToFm;
-        fD0    = 2.77 / m_gevToFm;
+        fF0    = 7.77 * m_gevToFm;
+        fD0    = 2.77 * m_gevToFm;
 
-        fPionac  = 57.63975274 / m_gevToFm;
+        fPionac  = 57.63975274 * m_gevToFm;
         fTwospin = 1;
 
-        fD0t = {1.7 / m_gevToFm, 0.};
-        fF0t = {-5.4 / m_gevToFm, 0.};
+        fD0t = {1.7 * m_gevToFm, 0.};
+        fF0t = {-5.4 * m_gevToFm, 0.};
 
         // ESC08
-        fF0s = {7.771 / m_gevToFm, 0.};
-        fD0s = {2.754 / m_gevToFm, 0.};
+        fF0s = {7.771 * m_gevToFm, 0.};
+        fD0s = {2.754 * m_gevToFm, 0.};
 
         fOneoveracsq = 1.0 / (fPionac * fPionac);
         fTwopioverac = 2.0 * m_pi / fPionac;
@@ -86,15 +86,15 @@ namespace JJCorrFitter
         switch (m_spinState)
         {
             case SpinState::SpinAveraged:
-                fF0 = pars.at(0) / m_gevToFm;
-                fD0 = pars.at(1) / m_gevToFm;
+                fF0 = pars.at(0) * m_gevToFm;
+                fD0 = pars.at(1) * m_gevToFm;
                 break;
 
             case SpinState::SpinSeparated:
-                fF0s = pars.at(0) / m_gevToFm;
-                fD0s = pars.at(1) / m_gevToFm;
-                fF0t = pars.at(2) / m_gevToFm;
-                fD0t = pars.at(3) / m_gevToFm;
+                fF0s = pars.at(0) * m_gevToFm;
+                fD0s = pars.at(1) * m_gevToFm;
+                fF0t = pars.at(2) * m_gevToFm;
+                fD0t = pars.at(3) * m_gevToFm;
                 break;
         
             default:
@@ -109,7 +109,7 @@ namespace JJCorrFitter
     
     double InteractionTermTPI::GetValue(float rStar, float cosTheta)
     {
-        return GetQuantumCoulombStrong(rStar / m_gevToFm,cosTheta);
+        return GetQuantumCoulombStrong(rStar * m_gevToFm, cosTheta);
     }
 
     constexpr double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
@@ -117,7 +117,7 @@ namespace JJCorrFitter
         if (rStar < 0.0000000001)
             return 1.0;
 
-        if (rStar < 1.0 / m_gevToFm) 
+        if (rStar < 1.0 * m_gevToFm) 
             return GetQuantumCoulomb(rStar,cosTheta);
 
         double tKstRst    = fKStar * rStar * cosTheta;
@@ -136,22 +136,22 @@ namespace JJCorrFitter
         if ((testp > 15.0) && (testm > 15.0)) 
         {
             double asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
-            asym = sqrt(asym);
+            asym = std::sqrt(asym);
             if (asym < 1.0)
                 ffminus.real(1.0 + (asym - 1.0) * 2.0);
             else
                 ffminus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffminus.imag(sqrt(asym * asym - ffminus.real() * ffminus.real()));
+            ffminus.imag(std::sqrt(asym * asym - ffminus.real() * ffminus.real()));
 
             asym = (1.0 - 1.0 / (rStar * (1.0 + tKstRst / rho) * fPionac * kstar * kstar)) / Gamow(kstar);
-            asym = sqrt(asym);
+            asym = std::sqrt(asym);
             if (asym < 1.0)
                 ffplus.real(1.0 + (asym - 1.0) * 2.0);
             else
                 ffplus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffplus.imag(sqrt(asym * asym - ffplus.real() * ffplus.real()));
+            ffplus.imag(std::sqrt(asym * asym - ffplus.real() * ffplus.real()));
         }
         // Check for the classical limit in both functions separately
         else if (((testp < 15.0) && (testm < 15.0)))  // ||
@@ -167,13 +167,13 @@ namespace JJCorrFitter
             if ((fabs(ffminus.real()) > 2.0) || fabs(ffminus.imag()) > 2.0) 
             {
                 double asym = (1.0 - 1.0 / (rStar * (1.0 - tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
-                asym = sqrt(asym);
+                asym = std::sqrt(asym);
                 if (asym < 1.0)
                     ffminus.real(1.0 + (asym - 1.0) * 2.0);
                 else
                     ffminus.real(1.0 + (asym - 1.0) / 2.0);
 
-                ffminus.imag(sqrt(asym * asym - ffminus.real() * ffminus.real()));
+                ffminus.imag(std::sqrt(asym * asym - ffminus.real() * ffminus.real()));
             }
             ccase = 2;
         }
@@ -184,13 +184,13 @@ namespace JJCorrFitter
             if ((fabs(ffplus.real()) > 2.0) || fabs(ffplus.imag()) > 2.0) 
             {
                 double asym = (1.0 - 1.0 / (rStar * (1.0 + tKstRst / (rho) *fPionac * kstar * kstar))) / Gamow(kstar);
-                asym = sqrt(asym);
+                asym = std::sqrt(asym);
                 if (asym < 1.0)
                     ffplus.real(1.0 + (asym - 1.0) * 2.0);
                 else
                     ffplus.real(1.0 + (asym - 1.0) / 2.0);
 
-                ffplus.imag(sqrt(asym * asym - ffplus.real() * ffplus.real()));
+                ffplus.imag(std::sqrt(asym * asym - ffplus.real() * ffplus.real()));
             }
             ccase = 3;
         }
@@ -232,22 +232,22 @@ namespace JJCorrFitter
         long double smult = 1 + wavesign;
 
         if (!finite(ffminus.real())) 
-            std::cout << "FFMinus Re not a number ! " << testp << " " << testm << " " << ccase << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulombStrong - FFMinus Re not a number ! " << testp << " " << testm << " " << ccase << "\n";
 
         if (!finite(ffminus.imag())) 
-            std::cout << "FFMinus Im not a number !" << testp << " " << testm << " " << ccase << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulombStrong - FFMinus Im not a number !" << testp << " " << testm << " " << ccase << "\n";
 
         if ((ffplus.real() > 2.0) || (ffplus.real() < -2.0))
-            std::cout << std::endl << "FFplus Re wild !" << ffplus.real() << " case " << ccase << " " << testp << " " << testm << std::endl;
+            std::cout << "\n" << "InteractionTermTPI::GetQuantumCoulombStrong - FFplus Re wild !" << ffplus.real() << " case " << ccase << " " << testp << " " << testm << "\n";
 
         if ((ffplus.imag() > 2.0) || (ffplus.imag() < -2.0))
-            std::cout << "FFplus Im wild !" << ffplus.imag() << " case " << ccase << " " << testp << " " << testm << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulombStrong - FFplus Im wild !" << ffplus.imag() << " case " << ccase << " " << testp << " " << testm << "\n";
 
         if ((ffminus.real() > 2.0) || (ffminus.real() < -2.0))
-            std::cout << std::endl << "FFminus Re wild !" << ffminus.real() << " case " << ccase << std::endl;
+            std::cout << "\n" << "InteractionTermTPI::GetQuantumCoulombStrong - FFminus Re wild !" << ffminus.real() << " case " << ccase << "\n";
 
         if ((ffminus.imag() > 2.0) || (ffminus.imag() < -2.0))
-            std::cout << "FFminus Im wild !" << ffminus.imag() << " case " << ccase << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulombStrong - FFminus Im wild !" << ffminus.imag() << " case " << ccase << "\n";
 
         if (fTwospin == 1) 
         {
@@ -411,7 +411,7 @@ namespace JJCorrFitter
         {
             double fasymplus  = (1.0 - 1.0 / ((rStar + kstrst) * fPionac * fKStar * fKStar));
             double fasymminus = (1.0 - 1.0 / ((rStar - kstrst) * fPionac * fKStar * fKStar));
-            return 0.5 * ((fasymplus + fasymminus) * cos(2 * kstrst) + (2.0 * sqrt(fasymplus * fasymminus)));
+            return 0.5 * ((fasymplus + fasymminus) * cos(2 * kstrst) + (2.0 * std::sqrt(fasymplus * fasymminus)));
         }
 
         std::complex<long double> ffplus, ffminus;
@@ -427,26 +427,26 @@ namespace JJCorrFitter
             GetFFsingle(rStar,cosTheta,ffplus);
             double asym =
                 (1.0 - 1.0 / (rStar * (1.0 - kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
-            asym = sqrt(asym);
+            asym = std::sqrt(asym);
             if (asym < 1.0)
                 ffminus.real(1.0 + (asym - 1.0) * 2.0);
             else
                 ffminus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffminus.imag(sqrt(asym * asym - ffminus.real() * ffminus.real()));
+            ffminus.imag(std::sqrt(asym * asym - ffminus.real() * ffminus.real()));
             ccase      = 2;
         } 
         else 
         {
             GetFFsingle(rStar,cosTheta,ffminus, -1);
             double asym = (1.0 - 1.0 / (rStar * (1.0 + kstrst / (rStar * fabs(fKStar)) * fPionac * fKStar * fKStar))) / Gamow(fabs(fKStar));
-            asym = sqrt(asym);
+            asym = std::sqrt(asym);
             if (asym < 1.0)
                 ffplus.real(1.0 + (asym - 1.0) * 2.0);
             else
                 ffplus.real(1.0 + (asym - 1.0) / 2.0);
 
-            ffplus.imag(sqrt(asym * asym - ffplus.real() * ffplus.real()));
+            ffplus.imag(std::sqrt(asym * asym - ffplus.real() * ffplus.real()));
             ccase = 3;
         }
 
@@ -462,22 +462,22 @@ namespace JJCorrFitter
 
 
         if (!finite(ffminus.real()))
-        std::cout << "FFMinus Re not a number !" << " " << ccase << std::endl;
+        std::cout << "InteractionTermTPI::GetQuantumCoulomb - FFMinus Re not a number !" << " " << ccase << "\n";
 
         if (!finite(ffminus.imag()))
-        std::cout << "FFMinus Im not a number !" << " " << ccase << std::endl;
+        std::cout << "InteractionTermTPI::GetQuantumCoulomb - FFMinus Im not a number !" << " " << ccase << "\n";
 
         if ((ffplus.real() > 2.0) || (ffplus.real() < -2.0)) 
-            std::cout << std::endl << "FFplus Re wild !" << ffplus.real() << std::endl;
+            std::cout << "\n" << "InteractionTermTPI::GetQuantumCoulomb - FFplus Re wild !" << ffplus.real() << "\n";
 
         if ((ffplus.imag() > 2.0) || (ffplus.imag() < -2.0)) 
-            std::cout << "FFplus Im wild !" << ffplus.imag() << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulomb - FFplus Im wild !" << ffplus.imag() << "\n";
 
         if ((ffminus.real() > 2.0) || (ffminus.real() < -2.0))
-            std::cout << std::endl << "FFminus Re wild !" << ffminus.real() << " " << ccase << std::endl;
+            std::cout << "\n" << "InteractionTermTPI::GetQuantumCoulomb - FFminus Re wild !" << ffminus.real() << " " << ccase << "\n";
 
         if ((ffminus.imag() > 2.0) || (ffminus.imag() < -2.0)) 
-            std::cout << "FFminus Im wild !" << ffminus.imag() << " " << ccase << std::endl;
+            std::cout << "InteractionTermTPI::GetQuantumCoulomb - FFminus Im wild !" << ffminus.imag() << " " << ccase << "\n";
 
         fCoulqscpart = 0.5 * Gamow(fabs(fKStar)) * (norm(ffplus) + norm(ffminus));
 

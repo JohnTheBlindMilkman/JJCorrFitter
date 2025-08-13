@@ -70,7 +70,8 @@
                  */
                 constexpr double GetQuantumCoulomb(float rStar, float cosTheta);
 
-                static constexpr float m_gevToFm{0.197327};
+                static constexpr float m_gevToFm{5.0677302};
+                static constexpr float m_fmToGeV{1./m_gevToFm};
                 static constexpr float m_mevToGev{0.001};
                 static constexpr double m_pi{3.141592653589793238};
                 static constexpr int fCoulombSteps{170};

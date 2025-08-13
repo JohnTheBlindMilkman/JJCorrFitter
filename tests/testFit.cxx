@@ -2,6 +2,7 @@
 #include "CorrelationFunction1D.hxx"
 #include "SourceFunction1D.hxx"
 #include "DoubleGaussian1D.hxx"
+#include "CauchySource1D.hxx"
 #include "InteractionTermSchrodinger.hxx"
 #include "InteractionTermPhaseShift.hxx"
 #include "InteractionTermTPI.hxx"
@@ -12,14 +13,36 @@
 #include "TFile.h"
 #include "TH1D.h"
 #include "TCanvas.h"
+#include "TPaveText.h"
+#include "../../HADES/HADES-CrAP/Externals/Palettes.hxx"
+
+void prepareGraph(const std::unique_ptr<TH1> &hist, Color_t col)
+{
+    hist->SetMarkerColor(col);
+    hist->SetMarkerStyle(6);
+    hist->SetLineColor(col);
+
+    //hist->GetXaxis()->SetLabelSize();
+    //hist->GetXaxis()->SetLabelOffset();
+    //hist->GetXaxis()->SetTitleSize();
+    //hist->GetXaxis()->SetTitleOffset();
+
+    hist->GetXaxis()->SetTitleOffset();
+    hist->GetXaxis()->SetTitleSize(0.06);
+    hist->GetXaxis()->SetLabelSize(0.06);
+    hist->GetXaxis()->SetNdivisions(506);
+    hist->GetYaxis()->SetTitleSize(0.06);
+    hist->GetYaxis()->SetLabelSize(0.06);
+    hist->GetYaxis()->SetNdivisions(506);
+}
 
 int main()
 {
     using ParType = JJCorrFitter::Fitter::ParType;
 
     // load data
-    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/HADES-CrAP/output/1Dcorr_0_10_cent_forHAL.root"));
-    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatKt2"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_MomRes_forHAL.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatInteg"));
 
     // create CF object
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>
@@ -39,9 +62,9 @@ int main()
 
     // set parameters with limits
     fitter.SetParameter(ParType::Generic,"N",1.,0.001,0.95,1.05);
-    fitter.SetParameter(ParType::Generic,"Lambda",0.4,0.001,0.,1.);
-    fitter.SetParameter(ParType::Source,"Rinv1",3.5,0.001,0.5,6.);
-    //fitter.SetParameter(ParType::Source,"Rinv2",3.5,0.001,0.5,6.);
+    fitter.SetParameter(ParType::Generic,"Lambda",1./* ,0.001,0.,1. */);
+    fitter.SetParameter(ParType::Source,"Rinv",2.5,0.001,0.5,6.);
+    //fitter.SetParameter(ParType::Source,"Rinv2",6.,0.001,0.5,10.);
 
     // set fit tolerance and ROOT::Minimizer print level
     fitter.SetPrintLevel(0);
@@ -57,11 +80,30 @@ int main()
     std::unique_ptr<TH1> cf = fitter.GetFitFunction();
     hist = fitter.GetDataHistogram();
     hist->GetXaxis()->SetRangeUser(0,200);
+    hist->SetTitle(";k^{*} [MeV/c];C(k^{*})");
+    prepareGraph(hist,JJColor::fWutMainColors[1]);
+
+    // make text box with fit params
+    std::unique_ptr<TPaveText> tpt(new TPaveText(0.6,0.85,0.98,0.98,"nbr"));
+    tpt->SetTextAngle(12);
+    tpt->SetFillColor(0);
+
+    std::vector<std::string> parNames{"N","#lambda","R_{inv}"};
+    auto params = fitter.GetFitParameterValues();
+    auto errors = fitter.GetFitParameterErrors();
+    for (std::size_t i = 0 ; i < parNames.size(); ++i)
+    {
+        tpt->AddText(TString::Format("%s = %lf +/- %lf",parNames.at(i).c_str(),params.at(i),errors.at(i)));
+    }
 
     std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
+    c->SetMargin(0.15,0.02,0.15,0.02);
+    JJColor::CreatePrimaryWutGradient();
+
     hist->Draw();
-    cf->SetLineColor(kRed);
+    cf->SetLineColor(JJColor::fWutSecondaryColors[3]);
     cf->Draw("c same");
+    tpt->Draw("same");
 
     std::unique_ptr<TFile> otp(TFile::Open("fit1DCF.root","recreate"));
     c->Write();

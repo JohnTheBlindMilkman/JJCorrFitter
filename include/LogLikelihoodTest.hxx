@@ -33,11 +33,8 @@
                 LogLikelihoodTest& operator=(LogLikelihoodTest &&) noexcept;
 
                 [[nodiscard]] std::function<double (const double *)> GetObjectiveFunction(const std::vector<std::size_t> &corrFuncIndexes,const std::vector<std::size_t> &srcIndexes,const std::vector<std::size_t> &psiIndexes);
-                [[nodiscard]] std::size_t GetNParams() const;
-        };
-
-        inline std::size_t LogLikelihoodTest::GetNParams() const {return m_corrFunc->GetNParams();}
-        
+                [[nodiscard]] std::size_t GetNParams() const {return m_corrFunc->GetNParams();}
+        };        
     } // namespace JJCorrFitter
     
 
