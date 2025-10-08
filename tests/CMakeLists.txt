@@ -15,6 +15,21 @@ if(JJCORRFITTER_ENABLE_TESTS)
     add_executable(fit1DCF testFit.cxx)
     target_link_libraries(fit1DCF PRIVATE JJCorrFitter)
     target_compile_features(fit1DCF  PRIVATE cxx_std_17)
+
+    add_executable(smashCf testSmashCf.cxx)
+    target_link_libraries(smashCf PRIVATE JJCorrFitter)
+    target_compile_features(smashCf  PRIVATE cxx_std_17)
+
+    # if(CMAKE_BUILD_TYPE MATCHES "Debug" AND JJCORRFITTER_ENABLE_ASAN)
+    #     set(
+    #         CMAKE_CXX_FLAGS
+    #         "${CMAKE_CXX_FLAGS} -Werror -fsanitize=undefined -fsanitize=address"
+    #     )
+    #     target_link_options(fit1DCF
+    #         BEFORE PUBLIC -fsanitize=undefined PUBLIC -fsanitize=address
+    #     )
+    # endif()
+
     add_executable(fitAll1DCF fitAll.cxx)
     target_link_libraries(fitAll1DCF PRIVATE JJCorrFitter)
     target_compile_features(fitAll1DCF  PRIVATE cxx_std_17)

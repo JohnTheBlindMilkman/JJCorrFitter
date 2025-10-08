@@ -21,6 +21,7 @@ add_subdirectory(configuredFiles)
 # defining options which can be enabled during building
 option(JJCORRFITTER_ENABLE_DOXYGEN "Enable doxygen" OFF)
 option(JJCORRFITTER_ENABLE_TESTS "Enable tests" ON)
+option(JJCORRFITTER_ENABLE_ASAN "Enable address sanitizer" ON)
 
 # creates Doxygen documentation with modern and fancy HTML look
 if(JJCORRFITTER_ENABLE_DOXYGEN)
@@ -103,6 +104,12 @@ target_include_directories(
     JJCorrFitter
     PUBLIC
     "$<BUILD_INTERFACE:/home/jedkol/Downloads/CorAL/include>" 
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+) 
+target_include_directories(
+    JJCorrFitter
+    PUBLIC
+    "$<BUILD_INTERFACE:${ROOT_INCLUDE_DIRS}>" 
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 ) 
 

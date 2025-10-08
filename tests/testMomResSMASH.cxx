@@ -83,31 +83,33 @@ void smear(JJUtils::ParticleOscar13 &part)
 {
     constexpr float GeVtoMeV{1000.f};
     constexpr float MeVtoGeV{0.001f};
-    constexpr float DegToRad{3.14159f/180.f};
+    constexpr float DegToRad{3.14159f / 180.f};
 
     double mom = part.fourMom.P();
     double phi = part.fourMom.Phi();
     double theta = part.fourMom.Theta();
 
-    std::normal_distribution<double> rngMom(fMomMu->Eval(mom*GeVtoMeV),fMomSig->Eval(mom*GeVtoMeV));
-    std::normal_distribution<double> rngPhi(fPhiMu->Eval(mom*GeVtoMeV),fPhiSig->Eval(mom*GeVtoMeV));
-    std::normal_distribution<double> rngTheta(fThetaMu->Eval(mom*GeVtoMeV),fThetaSig->Eval(mom*GeVtoMeV));
+    std::normal_distribution<double> rngMom(fMomMu->Eval(mom * GeVtoMeV),fMomSig->Eval(mom * GeVtoMeV));
+    std::normal_distribution<double> rngPhi(fPhiMu->Eval(mom * GeVtoMeV),fPhiSig->Eval(mom * GeVtoMeV));
+    std::normal_distribution<double> rngTheta(fThetaMu->Eval(mom * GeVtoMeV),fThetaSig->Eval(mom * GeVtoMeV));
 
-    mom += rngMom(mersenneTwister)*MeVtoGeV;
-    phi += rngPhi(mersenneTwister)*DegToRad;
-    theta += rngTheta(mersenneTwister)*DegToRad;
+    mom = 1. / mom;
+    mom += rngMom(mersenneTwister) * MeVtoGeV;
+    mom = 1. / mom;
+    phi += rngPhi(mersenneTwister) * DegToRad;
+    theta += rngTheta(mersenneTwister) * DegToRad;
 
     part.px = mom * std::cos(phi) * std::sin(theta);
     part.py = mom * std::sin(phi) * std::sin(theta);
     part.pz = mom * std::cos(theta);
-    part.p0 = std::sqrt(part.px*part.px + part.py*part.py + part.pz*part.pz + part.mass*part.mass);
+    part.p0 = std::sqrt(part.px * part.px + part.py * part.py + part.pz * part.pz + part.mass * part.mass);
 }
 
 int main()
 {
-    const std::string inputfileBase{"/home/jedkol/Downloads/HADES/SMASHdata/particle_list_"};
-    constexpr unsigned long numberOfEvents = 10000;
-    constexpr unsigned long numberOfFiles = 10;
+    const std::string inputfileBase{"/home/jedkol/lustre/hades/user/kjedrzej/SmashResults/AuAu_1p23AGeV_0_10cent_new/particle_list_"};
+    constexpr std::size_t numberOfEvents = 10000;
+    constexpr std::size_t numberOfFiles = 10;
     
     indicators::BlockProgressBar bar{indicators::option::BarWidth{80},
                     indicators::option::ForegroundColor{indicators::Color::yellow},
@@ -116,6 +118,7 @@ int main()
                     indicators::option::PrefixText{"Smearing momenta "},
                     indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}},
                     indicators::option::MaxProgress{numberOfEvents*numberOfFiles}};
+
     double kStarIdeal, kStarSmeared, rStarIdeal, rStarSmeared, cosThetaIdeal, cosThetaSmeared, weight;
     std::string tmp, inputFileName;
     int numberOfTracks, counter = 1;
@@ -124,15 +127,15 @@ int main()
     JJCorrFitter::InteractionTermSchrodinger wavefunction;
     std::ifstream inputfile;
 
-    std::unique_ptr<TH1D> hIdealNum(new TH1D("hIdealNum",";q^{ideal}_{inv} [MeV/c];C(q^{ideal}_{inv})",750,0,3000));
-    std::unique_ptr<TH1D> hIdealDen(new TH1D("hIdealDen",";q^{ideal}_{inv} [MeV/c];C(q^{ideal}_{inv})",750,0,3000));
-    std::unique_ptr<TH1D> hSmearedNum(new TH1D("hSmearedNum",";q^{smeared}_{inv} [MeV/c];C(q^{smeared}_{inv})",750,0,3000));
-    std::unique_ptr<TH1D> hSmearedDen(new TH1D("hSmearedDen",";q^{smeared}_{inv} [MeV/c];C(q^{smeared}_{inv})",750,0,3000));
-    std::unique_ptr<TH1D> hRStarDiff(new TH1D("hRStarDiff",";#left| k^{*}_{ideal} - k^{*}_{smeared} #right| [fm];",1000,0,1));
+    TH1D *hIdealNum = new TH1D("hIdealNum",";q^{ideal}_{inv} [MeV/c];C(q^{ideal}_{inv})",750,0,3000);
+    TH1D *hIdealDen = new TH1D("hIdealDen",";q^{ideal}_{inv} [MeV/c];C(q^{ideal}_{inv})",750,0,3000);
+    TH1D *hSmearedNum = new TH1D("hSmearedNum",";q^{smeared}_{inv} [MeV/c];C(q^{smeared}_{inv})",750,0,3000);
+    TH1D *hSmearedDen = new TH1D("hSmearedDen",";q^{smeared}_{inv} [MeV/c];C(q^{smeared}_{inv})",750,0,3000);
+    TH1D *hRStarDiff = new TH1D("hRStarDiff",";#left| k^{*}_{ideal} - k^{*}_{smeared} #right| [fm];",1000,0,1);
 
     indicators::show_console_cursor(false);
 
-    for (unsigned long file = 0; file < numberOfFiles; ++file)
+    for (std::size_t file = 0; file < numberOfFiles; ++file)
     {
         inputFileName = inputfileBase + std::to_string(file) + ".oscar";
         inputfile.open(inputFileName);
@@ -147,9 +150,9 @@ int main()
             std::getline(inputfile,tmp);
         }
 
-        for (unsigned long event = 0; event < numberOfEvents; ++event)
+        for (std::size_t event = 0; event < numberOfEvents; ++event)
         {
-            inputfile >> tmp >> tmp >> tmp >> tmp >> numberOfTracks; // get the number of tracks for each event
+            inputfile >> tmp >> tmp >> tmp >> tmp >> tmp >> tmp >> numberOfTracks; // get the number of tracks for each event
 
             idealArray.clear();
             idealArray.resize(0);
@@ -161,7 +164,7 @@ int main()
                 JJUtils::ParticleOscar13 part;
                 inputfile >> part;
 
-                if (part.pdg == 2212 && part.fourMom.Pt() < 0.8)
+                if (part.pdg == 2212)
                 {
                     JJUtils::PropagatePositions(part);
                     idealArray.push_back(part);
@@ -172,10 +175,10 @@ int main()
 
             for (std::size_t it = 0; it < idealArray.size(); it++)
             {
-                for (std::size_t jt = it+1; jt <idealArray.size(); jt++)
+                for (std::size_t jt = it + 1; jt < idealArray.size(); jt++)
                 {
-                    std::tie(rStarIdeal,kStarIdeal,cosThetaIdeal) = CalcKinematics(idealArray[it],idealArray[jt]);
-                    std::tie(rStarSmeared,kStarSmeared,cosThetaSmeared) = CalcKinematics(smearedArray[it],smearedArray[jt]);
+                    std::tie(rStarIdeal,kStarIdeal,cosThetaIdeal) = CalcKinematics(JJUtils::ParticleOscar97(idealArray[it]),JJUtils::ParticleOscar97(idealArray[jt]));
+                    std::tie(rStarSmeared,kStarSmeared,cosThetaSmeared) = CalcKinematics(JJUtils::ParticleOscar97(smearedArray[it]),JJUtils::ParticleOscar97(smearedArray[jt]));
                     
                     hRStarDiff->Fill(std::abs(rStarIdeal - rStarSmeared));
 
@@ -205,23 +208,23 @@ int main()
     bar.mark_as_completed();
     indicators::show_console_cursor(true);
 
-    std::unique_ptr<TH1D> hRatioIdeal(static_cast<TH1D*>(hIdealNum->Clone("hRatioIdeal")));
-    hRatioIdeal->Divide(hIdealDen.get());
+    TH1D *hRatioIdeal = static_cast<TH1D*>(hIdealNum->Clone("hRatioIdeal"));
+    hRatioIdeal->Divide(hIdealDen);
     hRatioIdeal->SetTitle(";q_{inv} [MeV/c];C(q^{ideal}_{inv})");
-    JJUtils::Generic::SetErrorsDivide(hRatioIdeal.get(),hIdealNum.get(),hIdealDen.get());
+    JJUtils::Generic::SetErrorsDivide(hRatioIdeal,hIdealNum,hIdealDen);
 
-    std::unique_ptr<TH1D> hRatioSmeared(static_cast<TH1D*>(hSmearedNum->Clone("hRatioSmeared")));
-    hRatioSmeared->Divide(hSmearedDen.get());
+    TH1D *hRatioSmeared = static_cast<TH1D*>(hSmearedNum->Clone("hRatioSmeared"));
+    hRatioSmeared->Divide(hSmearedDen);
     hRatioSmeared->SetTitle(";q_{inv} [MeV/c];C(q^{smeared}_{inv})");
-    JJUtils::Generic::SetErrorsDivide(hRatioSmeared.get(),hSmearedNum.get(),hSmearedDen.get());
+    JJUtils::Generic::SetErrorsDivide(hRatioSmeared,hSmearedNum,hSmearedDen);
 
-    std::unique_ptr<TH1D> hRatio(static_cast<TH1D*>(hRatioIdeal->Clone("hRatio")));
-    hRatio->Divide(hRatioSmeared.get());
+    TH1D *hRatio = static_cast<TH1D*>(hRatioIdeal->Clone("hRatio"));
+    hRatio->Divide(hRatioSmeared);
     //hRatio->Sumw2();
     hRatio->SetTitle(";q_{inv} [MeV/c];C(q^{ideal}_{inv})/C(q^{smeared}_{inv})");
-    //JJUtils::Generic::SetErrors(hRatio.get(),hRatioIdeal.get(),hRatioSmeared.get()); // IMO those are not correlated
+    //JJUtils::Generic::SetErrors(hRatio,hRatioIdeal,hRatioSmeared); // IMO those are not correlated
 
-    std::unique_ptr<TFile> otpFile(TFile::Open("momRes1DSmash.root","recreate"));
+    std::unique_ptr<TFile> otpFile(TFile::Open("momRes1DSmashInvP_Acceptance.root","recreate"));
     hIdealNum->Write();
     hIdealDen->Write();
     hSmearedNum->Write();

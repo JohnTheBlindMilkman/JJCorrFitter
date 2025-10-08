@@ -31,6 +31,8 @@ namespace JJCorrFitter
     fKStarLong(0),
     fKStar(0) 
     {
+        std::cout << "This method is depricated for now" << std::endl;
+        std::exit(1);
         switch (state)
         {
             case SpinState::SpinAveraged:
@@ -486,10 +488,10 @@ namespace JJCorrFitter
 
     constexpr void InteractionTermTPI::GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
     {
-        std::array<long double,fCoulombSteps> comprep{0};
-        std::array<long double,fCoulombSteps> compimp{0};
-        std::array<long double,fCoulombSteps> comprem{0};
-        std::array<long double,fCoulombSteps> compimm{0};
+        std::array<long double,fCoulombSteps> comprep = {};
+        std::array<long double,fCoulombSteps> compimp = {};
+        std::array<long double,fCoulombSteps> comprem = {};
+        std::array<long double,fCoulombSteps> compimm = {};
         long double eta = 0, ksip = 0, ksim = 0;
         std::complex<long double> alfa, zetp, zetm;
 
@@ -568,8 +570,8 @@ namespace JJCorrFitter
 
     constexpr void InteractionTermTPI::GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign) const 
     {
-        std::array<double,fCoulombSteps> comprep{0};
-        std::array<double,fCoulombSteps> compimp{0};
+        std::array<double,fCoulombSteps> comprep = {};
+        std::array<double,fCoulombSteps> compimp = {};
         double eta = 0, ksip = 0;
         std::complex<long double> alfa, zetp;
 

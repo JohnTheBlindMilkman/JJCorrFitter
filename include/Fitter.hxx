@@ -70,12 +70,15 @@
                 void SetPrintLevel(int lvl);
                 void SetParameter(ParType type, const std::string &name, float start, float step, float min, float max);
                 void SetParameter(ParType type, const std::string &name, float start);
+                void SetDataHistogram(std::unique_ptr<TH1> &&data) noexcept {m_likelyhoodTest->SetHistogram(std::move(data));}
                 bool Fit();
                 void PrintInfo() const;
                 [[nodiscard]] std::unique_ptr<TH1> GetFitFunction() noexcept;
                 [[nodiscard]] std::unique_ptr<TH1> GetDataHistogram() noexcept;
                 [[nodiscard]] std::vector<double> GetFitParameterValues() const noexcept;
                 [[nodiscard]] std::vector<double> GetFitParameterErrors() const noexcept;
+                [[nodiscard]] int GetStatus() const noexcept {return m_minimiser->Status();}
+                [[nodiscard]] double GetMinValue() const noexcept {return m_minimiser->MinValue();}
         };
 
         inline void Fitter::SetMinimiser(std::unique_ptr<ROOT::Math::Minimizer> &&minimiser) noexcept {m_minimiser = std::move(minimiser);}
@@ -84,8 +87,8 @@
         inline void Fitter::SetMaxIterations(unsigned maxIters) noexcept {m_minimiser->SetMaxIterations(maxIters);}
         inline void Fitter::SetTolerance(double tol) {m_tolerance = tol; m_minimiser->SetTolerance(m_tolerance);}
         inline void Fitter::SetPrintLevel(int lvl) {m_printLevel = lvl; m_minimiser->SetPrintLevel(m_printLevel);}
-        inline std::unique_ptr<TH1> Fitter::GetFitFunction() noexcept {return std::move(m_likelyhoodTest->GetCorrelationFunction());}
-        inline std::unique_ptr<TH1> Fitter::GetDataHistogram() noexcept {return std::move(m_likelyhoodTest->GetHistogram());}
+        inline std::unique_ptr<TH1> Fitter::GetFitFunction() noexcept {return m_likelyhoodTest->GetCorrelationFunction();}
+        inline std::unique_ptr<TH1> Fitter::GetDataHistogram() noexcept {return m_likelyhoodTest->GetHistogram();}
         inline std::vector<double> Fitter::GetFitParameterValues() const noexcept {return m_valuesAtMinimum;}
         inline std::vector<double> Fitter::GetFitParameterErrors() const noexcept {return m_errorsAtMinimum;}
 

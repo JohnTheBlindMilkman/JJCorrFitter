@@ -14,6 +14,7 @@
 
     #include <complex>
     #include <iostream>
+    #include <array>
 
     #include "Math/Math.h"
 

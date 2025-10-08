@@ -94,7 +94,7 @@ std::unique_ptr<TH1D> CalculateSmearedFunction(const std::unique_ptr<TH1D> &cfId
 
 int main()
 {
-    std::unique_ptr<TFile> inp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1DMomResSigma_0_40_cent.root"));
+    std::unique_ptr<TFile> inp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1DMomResSigma_30_40_cent.root"));
     std::unique_ptr<TH1D> hist(inp->Get<TH1D>("hQinvSigma"));
 
     JJCorrFitter::CorrelationFunction1D func1(
@@ -104,9 +104,9 @@ int main()
 
     func1.SetBinning("hCFIdeal","",hist->GetNbinsX(),hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax() / 2.);
 
-    std::unique_ptr<TFile> otp(TFile::Open("momRes1D.root","recreate"));
+    std::unique_ptr<TFile> otp(TFile::Open("momRes1D_30_40_cent.root","recreate"));
 
-    for (const auto& radius : {1.})
+    for (const auto& radius : {4.})
     {
         func1.SetParameters({1,0.902764},{2.82633},{});
         std::unique_ptr<TH1> hCFIdealKstar = func1.Evaluate();

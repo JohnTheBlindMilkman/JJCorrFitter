@@ -56,7 +56,6 @@ namespace JJCorrFitter
         PassParametersToMinimiser(m_parMap);
 
         bool result = m_minimiser->Minimize();
-        std::unique_ptr<const double> minVals(m_minimiser->X());
         m_valuesAtMinimum = PassPointerArrayToVector(m_minimiser->X(),m_likelyhoodTest->GetNParams());
         m_errorsAtMinimum = PassPointerArrayToVector(m_minimiser->Errors(),m_likelyhoodTest->GetNParams());
 

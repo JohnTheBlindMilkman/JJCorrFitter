@@ -58,7 +58,7 @@
             inline void LikelihoodImpl::SetHistogram(std::unique_ptr<TH1> &&data) noexcept {m_dataToFit = std::move(data);}
             inline void LikelihoodImpl::SetCorrelationFunction(std::unique_ptr<CorrelationFunctionImpl> &&function) noexcept {m_corrFunc = std::move(function);}
             inline std::unique_ptr<TH1> LikelihoodImpl::GetHistogram() noexcept {return std::move(m_dataToFit);}
-            inline std::unique_ptr<TH1> LikelihoodImpl::GetCorrelationFunction() noexcept {return std::move(m_corrFunc->GetCorrelationFunction());}
+            inline std::unique_ptr<TH1> LikelihoodImpl::GetCorrelationFunction() noexcept {return m_corrFunc->GetCorrelationFunction();}
             inline std::string_view LikelihoodImpl::GetLikelihoodTestName() const noexcept {return m_likelihoodTestName;}
             inline std::string_view LikelihoodImpl::GetLikelihoodResultName() const noexcept {return m_likelihoodResultName;}
             inline std::string_view LikelihoodImpl::GetCorrelationFunctionName() const noexcept {return m_corrFunc->GetFunctionName();}

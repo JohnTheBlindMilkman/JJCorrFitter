@@ -43,21 +43,25 @@ int main()
     // load data
     std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_MomRes_forHAL.root"));
     std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatInteg"));
+    // std::unique_ptr<TFile> itp2(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_forHAL.root"));
+    // std::unique_ptr<TH1> signal(itp2->Get<TH1D>("hQinvSignInteg"));
+    // std::unique_ptr<TH1> background(itp2->Get<TH1D>("hQinvBckgInteg"));
 
     // create CF object
     std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>
     (
-        std::make_unique<JJCorrFitter::SourceFunction1D>(),
+        std::make_unique<JJCorrFitter::CauchySource1D>(),
         //std::make_unique<JJCorrFitter::InteractionTermTPI>(JJCorrFitter::InteractionTermTPI::SpinState::None)
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
-    func->SetBinning(hist,4,100);
+    func->SetBinning(hist,4,80);
 
     // create fitter object
     JJCorrFitter::Fitter fitter
     (
         std::unique_ptr<ROOT::Math::Minimizer>(ROOT::Math::Factory::CreateMinimizer("Minuit2","Migrad")),
-        std::make_unique<JJCorrFitter::ChiSquaredTest>(std::move(hist),std::move(func))
+        // std::make_unique<JJCorrFitter::LogLikelihoodTest>(std::move(hist), std::move(signal), std::move(background), std::move(func))
+        std::make_unique<JJCorrFitter::ChiSquaredTest>(std::move(hist), std::move(func))
     );
 
     // set parameters with limits

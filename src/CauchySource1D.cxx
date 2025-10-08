@@ -20,6 +20,7 @@ namespace JJCorrFitter
 
     double CauchySource1D::GetValue(float rStar) const noexcept
     {
-        return exp(-1. * rStar / (m_invariantRadius/*  * m_invariantRadius */));
+        return exp(-1. * rStar / m_invariantRadius);
+        // return 1. / (M_PI * 0.5 * m_invariantRadius * (1 + 0.25 * std::pow(rStar / m_invariantRadius, 2)));
     }
 } // namespace JJCorrFitter

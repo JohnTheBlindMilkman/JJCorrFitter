@@ -26,7 +26,7 @@ namespace JJCorrFitter
 
     std::function<double (const double *)> ChiSquaredTest::GetObjectiveFunction(const std::vector<std::size_t> &corrFuncIndexes,const std::vector<std::size_t> &srcIndexes,const std::vector<std::size_t> &psiIndexes)
     {
-        auto lambda = [=](const double *x)
+        auto lambda = [this,corrFuncIndexes,srcIndexes,psiIndexes](const double *x)
         {
             m_corrFunc->SetParameters(SortParameters(x,corrFuncIndexes),SortParameters(x,srcIndexes),SortParameters(x,psiIndexes));
             double chi2Ndf = CalculateChi2(m_dataToFit,m_corrFunc->Evaluate());

@@ -16,80 +16,41 @@
 int main()
 {
     // load data
-    // std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/mstefan/chuan.root"));
-    // std::unique_ptr<TH1> hist(itp->Get<TH1D>("hist"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/mstefan/chuan.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hist"));
 
     std::unique_ptr<TFile> otp(TFile::Open("draw1DCF.root","recreate"));
-    // hist->Write();
+    hist->Write();
 
-    // JJCorrFitter::CorrelationFunction1D func1(
-    //     std::make_unique<JJCorrFitter::SourceFunction1D>(),
-    //     std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
-    //     );
+    JJCorrFitter::CorrelationFunction1D func1(
+        std::make_unique<JJCorrFitter::SourceFunction1D>(),
+        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
+        );
 
-    // std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
-    // c->SetMargin(0.15,0.02,0.15,0.02);
+    std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
+    c->SetMargin(0.15,0.02,0.15,0.02);
 
-    // func1.SetBinning(hist,0,200);
-    // func1.SetParameters({1.02078,1.},{3.2026},{});
-    // func1.Evaluate()->Write("hQinvRatInteg_fitGauss");
+    func1.SetBinning(hist,0,200);
+    func1.SetParameters({1.02078,1.},{3.2026},{});
+    func1.Evaluate()->Write("hQinvRatInteg_fitGauss");
 
-    // JJCorrFitter::CorrelationFunction1D func2(
-    //     std::make_unique<JJCorrFitter::CauchySource1D>(),
-    //     std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
-    //     );
+    JJCorrFitter::CorrelationFunction1D func2(
+        std::make_unique<JJCorrFitter::CauchySource1D>(),
+        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
+        );
 
-    // func2.SetBinning(hist,0,200);
-    // func2.SetParameters({0.996768,1.},{2.94521},{});
-    // func2.Evaluate()->Write("hQinvRatInteg_fitCauchy");
+    func2.SetBinning(hist,0,200);
+    func2.SetParameters({0.996768,1.},{2.94521},{});
+    func2.Evaluate()->Write("hQinvRatInteg_fitCauchy");
 
-    // JJCorrFitter::CorrelationFunction1D func3(
-    //     std::make_unique<JJCorrFitter::DoubleGaussian1D>(),
-    //     std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
-    //     );
+    JJCorrFitter::CorrelationFunction1D func3(
+        std::make_unique<JJCorrFitter::DoubleGaussian1D>(),
+        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
+        );
 
-    // func3.SetBinning(hist,0,200);
-    // func3.SetParameters({1.00859,1.},{2.35467,5.05293},{});
-    // func3.Evaluate()->Write("hQinvRatInteg_fitDoubleGauss");
-
-    constexpr std::size_t nbins = 400;
-    constexpr double minbin = 0, maxbin = 35;
-
-    JJCorrFitter::SourceFunction1D gauss;
-    gauss.SetParameters({3.30343});
-    TH1D histGauss("histGauss","Gauss;r^{*} [fm]; S(r^{*}) [fm^{-3}]",nbins,minbin,maxbin);
-    for (std::size_t bin = 1; bin <= nbins; ++bin) 
-    {
-        histGauss.SetBinContent(bin,gauss.GetValue(histGauss.GetBinCenter(bin)));
-        histGauss.SetBinError(bin,0.);
-    }
-
-    histGauss.Scale(1./histGauss.Integral("width"));
-    histGauss.Write();
-    
-    JJCorrFitter::CauchySource1D cauchy;
-    cauchy.SetParameters({3.18045});
-    TH1D histCauchy("histCauchy","Cauchy;r^{*} [fm]; S(r^{*}) [fm^{-3}]",nbins,minbin,maxbin);
-    for (std::size_t bin = 1; bin <= nbins; ++bin) 
-    {
-        histCauchy.SetBinContent(bin,cauchy.GetValue(histCauchy.GetBinCenter(bin)));
-        histCauchy.SetBinError(bin,0.);
-    }
-
-    histCauchy.Scale(1./histCauchy.Integral("width"));
-    histCauchy.Write();
-
-    JJCorrFitter::DoubleGaussian1D doubleGauss;
-    doubleGauss.SetParameters({3.13185,5.3498});
-    TH1D histDoubleGauss("histDoubleGauss","Double Gauss;r^{*} [fm]; S(r^{*}) [fm^{-3}]",nbins,minbin,maxbin);
-    for (std::size_t bin = 1; bin <= nbins; ++bin) 
-    {
-        histDoubleGauss.SetBinContent(bin,doubleGauss.GetValue(histDoubleGauss.GetBinCenter(bin)));
-        histDoubleGauss.SetBinError(bin,0.);
-    }
-
-    histDoubleGauss.Scale(1./histDoubleGauss.Integral("width"));
-    histDoubleGauss.Write();
+    func3.SetBinning(hist,0,200);
+    func3.SetParameters({1.00859,1.},{2.35467,5.05293},{});
+    func3.Evaluate()->Write("hQinvRatInteg_fitDoubleGauss");
 
     otp->Save();
     otp->Close();
