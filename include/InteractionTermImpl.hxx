@@ -38,6 +38,7 @@
 
                 virtual void SetParameters(const std::vector<double> &pars) = 0;
                 virtual void SetMomentum(float kStar) = 0;
+                virtual void SetNMomentumBins(std::vector<float> nBins) = 0;
                 [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
                 [[nodiscard]] std::string_view GetInteractiontermName() const noexcept;

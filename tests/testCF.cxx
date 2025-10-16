@@ -16,8 +16,8 @@
 int main()
 {
     // load data
-    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/HADES/mstefan/chuan.root"));
-    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hist"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_MomRes_forHAL.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatInteg"));
 
     std::unique_ptr<TFile> otp(TFile::Open("draw1DCF.root","recreate"));
     hist->Write();
