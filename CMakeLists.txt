@@ -21,7 +21,7 @@ add_subdirectory(configuredFiles)
 # defining options which can be enabled during building
 option(JJCORRFITTER_ENABLE_DOXYGEN "Enable doxygen" OFF)
 option(JJCORRFITTER_ENABLE_TESTS "Enable tests" ON)
-option(JJCORRFITTER_ENABLE_ASAN "Enable address sanitizer" ON)
+option(JJCORRFITTER_ENABLE_ASAN "Enable address sanitizer" OFF)
 
 # creates Doxygen documentation with modern and fancy HTML look
 if(JJCORRFITTER_ENABLE_DOXYGEN)
@@ -66,6 +66,7 @@ set(HEADER_FILES
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunction3D.hxx
     ${PROJECT_SOURCE_DIR}/include/CorrelationFunctionImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/Fitter.hxx
+    ${PROJECT_SOURCE_DIR}/include/Grid.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermImpl.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermSchrodinger.hxx
     ${PROJECT_SOURCE_DIR}/include/InteractionTermPhaseShift.hxx

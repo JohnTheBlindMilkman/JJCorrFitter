@@ -37,6 +37,11 @@ namespace JJCorrFitter
         for (int i = 0; i <= nPoints; ++i)
             tmp[i] = start + i*step;
 
+        std::vector<float> tmp2 = tmp;
+        tmp2.insert(tmp2.end(),m_normalisationPoints.begin(),m_normalisationPoints.end());
+        std::sort(tmp2.begin(),tmp2.end());
+        m_interactionTerm->SetNMomentumBins(tmp2);
+        
         return tmp;
     }
 
@@ -75,17 +80,19 @@ namespace JJCorrFitter
         m_interactionTerm->SetMomentum(kStar);
 
         // TPI calculates wrong becasue of the 4 * pi * r * r factor!
-        auto kooninPratt = [&](double r, double ctheta){return 4 * M_PI * r * r * m_sourceFunction->GetValue(r) * (m_interactionTerm->GetValue(r,ctheta));};
+        auto kooninPratt = [&](double r, double ctheta) -> double {return 4 * M_PI * r * r * m_sourceFunction->GetValue(r) * (m_interactionTerm->GetValue(r,ctheta));};
 
-        auto f = [&](const double r){
-            auto g = [&](const double ctheta){
+        auto f = [&](const double r) -> double
+        {
+            auto g = [&](const double ctheta) -> double
+            {
                 return kooninPratt(r,ctheta);
             };
             return gauss<double,30>::integrate(g,-1,1);
         };
 
         double error = 0.;
-        double result = gauss_kronrod<double,61>::integrate(f,0.,std::numeric_limits<double>::infinity(),0,0,&error);
+        double result = gauss_kronrod<double,61>::integrate(f,0.,50.,0,0,&error); // should be 0 to inf, but nothing happens above ~20 fm
         return std::make_pair(result,error);
     }
 
