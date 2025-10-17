@@ -3,27 +3,23 @@
 namespace JJCorrFitter
 {
     InteractionTermPhaseShift::InteractionTermPhaseShift() : 
-    m_waveFunction(new CWaveFunction_pp_phaseshift("./wfparameters.dat")), m_kStar(5.)
+    m_waveFunction("./wfparameters.dat"), m_kStar(5.)
     {
         m_InteractionTermName = "p-p phase-shift (CorAL)";
         m_numberOfParams = 0;
-        m_nqMax = m_waveFunction->GetNQMAX();
+        m_nqMax = m_waveFunction.GetNQMAX();
     }
 
     InteractionTermPhaseShift::~InteractionTermPhaseShift()
     {}
 
-    InteractionTermPhaseShift::InteractionTermPhaseShift(InteractionTermPhaseShift &&other) noexcept
-    {
-        m_waveFunction = std::move(other.m_waveFunction);
-        other.m_waveFunction = nullptr;
-        m_nqMax = std::move(other.m_nqMax);
-    }
+    InteractionTermPhaseShift::InteractionTermPhaseShift(InteractionTermPhaseShift &&other) noexcept : 
+        m_waveFunction(other.m_waveFunction), m_nqMax(other.m_nqMax)
+    {}
 
     InteractionTermPhaseShift& InteractionTermPhaseShift::operator=(InteractionTermPhaseShift &&other) noexcept
     {
         m_waveFunction = std::move(other.m_waveFunction);
-        other.m_waveFunction = nullptr;
         m_nqMax = std::move(other.m_nqMax);
 
         return *this;
@@ -37,14 +33,14 @@ namespace JJCorrFitter
         }
     }
 
-    void InteractionTermPhaseShift::SetMomentum(float kStar)
+    void InteractionTermPhaseShift::SetMomentum(double kStar)
     {
         m_kStar = kStar;
     }
     
-    double InteractionTermPhaseShift::GetValue(float rStar, float cosTheta)
+    double InteractionTermPhaseShift::GetValue(double rStar, double cosTheta)
     {
-        return m_waveFunction->GetPsiSquared(m_kStar,rStar,cosTheta);
+        return m_waveFunction.GetPsiSquared(m_kStar,rStar,cosTheta);
     }
 
 } // namespace JJCorrFitter

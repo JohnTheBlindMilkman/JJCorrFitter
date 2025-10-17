@@ -18,9 +18,6 @@
 
     #include "gsl/gsl_sf_legendre.h"
 
-    #include "boost/math/quadrature/gauss.hpp"
-    #include "boost/math/quadrature/gauss_kronrod.hpp"
-
     #include "CorrelationFunctionImpl.hxx"
 
     namespace JJCorrFitter
@@ -28,17 +25,17 @@
         class CorrelationFunction1D : public CorrelationFunctionImpl
         {
             private:
-                float m_minKStar,m_maxKStar;
+                double m_minKStar,m_maxKStar;
                 int m_nPoints;
                 std::string m_histogramName, m_histogramTitle;
-                std::vector<float> m_kStarValues;
+                std::vector<double> m_kStarValues;
                 std::vector<double> m_correlationPoints, m_correlationErrors;
 
                 [[nodiscard]] std::unique_ptr<TH1D> MakeHistogram(const std::vector<double> &points, const std::vector<double> &errors, const std::vector<double> &params);
-                [[nodiscard]] std::vector<float> SetKStarPoints(float start, float stop, int nPoints);
+                [[nodiscard]] std::vector<double> SetKStarPoints(double start, double stop, int nPoints);
                 void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors);
                 [[nodiscard]] std::pair<double,double> CalculatePoint();
-                [[nodiscard]] std::pair<double,double> CalculatePoint(float kStar);
+                [[nodiscard]] std::pair<double,double> CalculatePoint(double kStar);
 
             public:
                 CorrelationFunction1D(/* args */) = delete;
@@ -49,8 +46,8 @@
                 CorrelationFunction1D(CorrelationFunction1D&&) noexcept = default;
                 CorrelationFunction1D& operator=(CorrelationFunction1D&&) noexcept = default;
 
-                void SetBinning(const std::unique_ptr<TH1> &data, float minKstar = -1, float maxKstar = -1);
-                void SetBinning(const std::string &name, const std::string &title, int nPoints, float minKStar, float maxKstar);
+                void SetBinning(const std::unique_ptr<TH1> &data, double minKstar = -1, double maxKstar = -1);
+                void SetBinning(const std::string &name, const std::string &title, int nPoints, double minKStar, double maxKstar);
                 [[nodiscard]] std::unique_ptr<TH1> Evaluate();
                 void SetParameters(const std::vector<double> &generalPars,const std::vector<double> &srcPars,const std::vector<double> &psiPars);
                 [[nodiscard]] std::size_t GetNParams() const noexcept;

@@ -29,19 +29,22 @@ namespace JJCorrFitter
         return tmp;
     }
 
-    std::vector<float> CorrelationFunction1D::SetKStarPoints(float start, float stop, int nPoints)
+    std::vector<double> CorrelationFunction1D::SetKStarPoints(double start, double stop, int nPoints)
     {
-        std::vector<float> tmp(nPoints+1);
-        const float step = (stop - start) / nPoints;
+        std::vector<double> tmp(nPoints+1);
+        const double step = (stop - start) / nPoints;
 
         for (int i = 0; i <= nPoints; ++i)
             tmp[i] = start + i*step;
 
-        std::vector<float> tmp2 = tmp;
+        std::vector<double> tmp2 = tmp;
         tmp2.insert(tmp2.end(),m_normalisationPoints.begin(),m_normalisationPoints.end());
         std::sort(tmp2.begin(),tmp2.end());
-        m_interactionTerm->SetNMomentumBins(tmp2);
-        
+        m_interactionTerm->SetMomentumBins(std::move(tmp2));
+        m_interactionTerm->SetDistanceBins(CalculateIntSamplePoints(m_rIntRange,boost::math::quadrature::gauss_kronrod<double,61>::abscissa()));
+        m_interactionTerm->SetCosThetaBins(CalculateIntSamplePoints(m_cosThetaIntRange,boost::math::quadrature::gauss<double,30>::abscissa()));
+        m_interactionTerm->PopulateGrid();
+
         return tmp;
     }
 
@@ -72,7 +75,7 @@ namespace JJCorrFitter
         return std::make_pair(0,0);
     }
 
-    std::pair<double,double> CorrelationFunction1D::CalculatePoint(float kStar)
+    std::pair<double,double> CorrelationFunction1D::CalculatePoint(double kStar)
     {
         using boost::math::quadrature::gauss;
         using boost::math::quadrature::gauss_kronrod;
@@ -96,7 +99,7 @@ namespace JJCorrFitter
         return std::make_pair(result,error);
     }
 
-    void CorrelationFunction1D::SetBinning(const std::unique_ptr<TH1> &data, float minKstar, float maxKstar)
+    void CorrelationFunction1D::SetBinning(const std::unique_ptr<TH1> &data, double minKstar, double maxKstar)
     {
         if (minKstar > maxKstar)
             throw std::logic_error("CorrelationFunction1D::SetBinning - minimal value of k* is greater than the maximal value");
@@ -114,7 +117,7 @@ namespace JJCorrFitter
         m_kStarValues = SetKStarPoints(m_minKStar,m_maxKStar,m_nPoints);
     }
 
-    void CorrelationFunction1D::SetBinning(const std::string &name, const std::string &title, int nPoints, float minKstar, float maxKstar)
+    void CorrelationFunction1D::SetBinning(const std::string &name, const std::string &title, int nPoints, double minKstar, double maxKstar)
     {
         if (minKstar > maxKstar)
             throw std::logic_error("CorrelationFunction1D::SetBinning - minimal value of k* is greater than the maximal value");
