@@ -33,33 +33,35 @@ namespace JJCorrFitter
         }
     }
 
-    void InteractionTermSchrodinger::SetMomentum(float kStar)
+    void InteractionTermSchrodinger::SetMomentum(double kStar)
     {
         m_kStar = kStar;
     }
-
-    void InteractionTermSchrodinger::SetNMomentumBins(std::vector<float> nBins)
-    {
-        m_nMomBins = nBins;
-        m_grid = Grid<double>(m_nMomBins.size(),m_nRPoints,m_nCosThetaPoints);
-        PopulateGrid();
-    }
     
-    double InteractionTermSchrodinger::GetValue(float rStar, float cosTheta)
+    double InteractionTermSchrodinger::GetValue(double rStar, double cosTheta)
     {
-        std::size_t momBin = std::distance(m_nMomBins.begin(),std::lower_bound(m_nMomBins.begin(),m_nMomBins.end(),m_kStar));
+        std::size_t momBin = std::distance(m_qPoints.begin(),std::lower_bound(m_qPoints.begin(),m_qPoints.end(),m_kStar));
         std::size_t rBin = std::distance(m_rPoints.begin(),std::lower_bound(m_rPoints.begin(),m_rPoints.end(),rStar));
-        std::size_t ctBin = std::distance(m_cosThetaPoints.begin(),std::lower_bound(m_cosThetaPoints.begin(),m_cosThetaPoints.end(),cosTheta));
+        std::size_t ctBin = std::distance(m_ctPoints.begin(),std::lower_bound(m_ctPoints.begin(),m_ctPoints.end(),cosTheta));
 
         return m_grid.at(momBin,rBin,ctBin);
     }
 
     void InteractionTermSchrodinger::PopulateGrid()
     {
-        for (std::size_t qBin = 0; qBin < m_nMomBins.size(); ++qBin)
-            for (std::size_t rBin = 0; rBin < m_nRPoints; ++rBin)
-                for (std::size_t ctBin = 0; ctBin < m_nCosThetaPoints; ++ctBin)
-                    m_grid(qBin,rBin,ctBin) = m_waveFunction.GetPsiSquared(m_nMomBins.at(qBin),m_rPoints.at(rBin),m_cosThetaPoints.at(ctBin));
+        auto qSize = m_qPoints.size();
+        auto rSize = m_rPoints.size();
+        auto ctSize = m_ctPoints.size();
+
+        if (qSize == 0 || rSize == 0 || ctSize == 0)
+            throw std::runtime_error("InteractionTermSchroedinger::PolulateGrid(): current grid size is 0 in (at least) one dimension");
+
+        m_grid = Grid<double>(qSize,rSize,ctSize);
+
+        for (std::size_t qBin = 0; qBin < qSize; ++qBin)
+            for (std::size_t rBin = 0; rBin < rSize; ++rBin)
+                for (std::size_t ctBin = 0; ctBin < ctSize; ++ctBin)
+                    m_grid(qBin,rBin,ctBin) = m_waveFunction.GetPsiSquared(m_qPoints.at(qBin),m_rPoints.at(rBin),m_ctPoints.at(ctBin));
     }
 
 } // namespace JJCorrFitter

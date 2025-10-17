@@ -13,6 +13,7 @@
     #define Grid_hxx
 
     #include <vector>
+    #include <sstream>
     
     namespace JJCorrFitter
     {

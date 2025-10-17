@@ -17,6 +17,8 @@
     #include <string_view>
     #include <vector>
 
+    #include "Grid.hxx"
+
     namespace JJCorrFitter
     {
         class InteractionTermImpl
@@ -27,6 +29,8 @@
             protected:
                 std::size_t m_numberOfParams;
                 std::string_view m_InteractionTermName;
+                std::vector<double> m_qPoints, m_rPoints, m_ctPoints;
+                Grid<double> m_grid;
 
             public:
                 InteractionTermImpl(/* args */) = default;
@@ -37,9 +41,12 @@
                 InteractionTermImpl& operator=(InteractionTermImpl&&) noexcept = default;
 
                 virtual void SetParameters(const std::vector<double> &pars) = 0;
-                virtual void SetMomentum(float kStar) = 0;
-                virtual void SetNMomentumBins(std::vector<float> nBins) = 0;
-                [[nodiscard]] virtual double GetValue(float rStar, float cosTheta) = 0;
+                virtual void SetMomentum(double kStar) = 0;
+                void SetMomentumBins(std::vector<double> &&qBins) noexcept {m_qPoints = std::move(qBins);}
+                void SetDistanceBins(std::vector<double> &&rBins) noexcept {m_rPoints = std::move(rBins);}
+                void SetCosThetaBins(std::vector<double> &&ctBins) noexcept {m_ctPoints = std::move(ctBins);}
+                virtual void PopulateGrid() = 0;
+                [[nodiscard]] virtual double GetValue(double rStar, double cosTheta) = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
                 [[nodiscard]] std::string_view GetInteractiontermName() const noexcept;
         };

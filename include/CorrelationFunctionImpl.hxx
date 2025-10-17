@@ -16,6 +16,9 @@
     
     #include <TH1.h>
 
+    #include "boost/math/quadrature/gauss.hpp"
+    #include "boost/math/quadrature/gauss_kronrod.hpp"
+
     #include "SourceFunctionImpl.hxx"
     #include "InteractionTermImpl.hxx"
 
@@ -27,12 +30,31 @@
 
             protected:
                 static constexpr std::array<double,6> m_normalisationPoints{200,250,300,350,400,450};
+                static constexpr std::pair<double,double> m_cosThetaIntRange{-1,1};
+                static constexpr std::pair<double,double> m_rIntRange{0,50};
                 
                 std::size_t m_numberOfParams, m_totalNumberOfParams;
                 std::unique_ptr<SourceFunctionImpl> m_sourceFunction;
                 std::unique_ptr<InteractionTermImpl> m_interactionTerm;
                 std::vector<double> m_corrFuncParams, m_sourceFunctionParams, m_interactionTermParams;
                 std::string_view m_correlationFunctionName;
+
+                template <typename T, std::size_t N>
+                std::vector<double> CalculateIntSamplePoints(const std::pair<double,double> &range, const std::array<T,N> &abscissa) const noexcept
+                {
+                    std::vector<double> samples;
+
+                    double avg = (range.first + range.second) / 2;
+                    double scale = (range.first - range.second) / 2;
+
+                    std::transform(abscissa.begin(),abscissa.end(),std::back_inserter(samples),
+                        [&avg,&scale](double x){return avg + scale * x;});
+                    std::transform(abscissa.begin(),abscissa.end(),std::back_inserter(samples),
+                        [&avg,&scale](double x){return avg + scale * -x;});
+                    std::sort(samples.begin(),samples.end());
+
+                    return samples;
+                }
 
                 virtual void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors) = 0;
                 [[nodiscard]] virtual std::pair<double,double> CalculatePoint() = 0;
@@ -45,8 +67,8 @@
                 CorrelationFunctionImpl(CorrelationFunctionImpl&&) noexcept = default;
                 CorrelationFunctionImpl& operator=(CorrelationFunctionImpl&&) noexcept = default;
 
-                virtual void SetBinning(const std::unique_ptr<TH1> &data, float minKstar = -1, float maxKstar = -1) = 0;
-                virtual void SetBinning(const std::string &name, const std::string &title, int nPoints, float minKStar, float maxKstar) = 0;
+                virtual void SetBinning(const std::unique_ptr<TH1> &data, double minKstar = -1, double maxKstar = -1) = 0;
+                virtual void SetBinning(const std::string &name, const std::string &title, int nPoints, double minKStar, double maxKstar) = 0;
                 [[nodiscard]] virtual std::unique_ptr<TH1> Evaluate() = 0;
                 virtual void SetParameters(const std::vector<double> &generalPars,const std::vector<double> &srcPars,const std::vector<double> &psiPars) = 0;
                 [[nodiscard]] std::size_t GetNParams() const noexcept;

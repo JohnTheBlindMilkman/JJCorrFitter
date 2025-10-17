@@ -18,9 +18,6 @@
 
     #include "gsl/gsl_sf_legendre.h"
 
-    #include "boost/math/quadrature/gauss.hpp"
-    #include "boost/math/quadrature/gauss_kronrod.hpp"
-
     #include "CorrelationFunctionImpl.hxx"
 
     namespace JJCorrFitter
