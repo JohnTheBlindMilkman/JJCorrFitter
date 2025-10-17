@@ -21,12 +21,12 @@
         class InteractionTermPhaseShift : public InteractionTermImpl
         {
             private:
-                std::unique_ptr<CWaveFunction> m_waveFunction;
+                CWaveFunction_pp_phaseshift m_waveFunction;
                 const std::string m_coralParFile{"./wfparameters.dat"};
                 static constexpr int m_kStarMin{0};
                 static constexpr int m_gevToMev{1000};
                 int m_nqMax;
-                float m_kStar;
+                double m_kStar;
 
             public:
                 InteractionTermPhaseShift(/* args */);
@@ -37,8 +37,8 @@
                 InteractionTermPhaseShift& operator=(InteractionTermPhaseShift&&) noexcept;
 
                 void SetParameters(const std::vector<double> &pars);
-                void SetMomentum(float kStar);
-                [[nodiscard]] double GetValue(float rStar, float cosTheta);
+                void SetMomentum(double kStar);
+                [[nodiscard]] double GetValue(double rStar, double cosTheta);
         };
 
     } // namespace JJCorrFitter
