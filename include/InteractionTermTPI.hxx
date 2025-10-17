@@ -34,14 +34,14 @@
                  * @param ffp
                  * @param sign
                  */
-                constexpr void GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign = 1) const;
+                constexpr void GetFFsingle(double rStar, double cosTheta, std::complex<long double> &ffp, int sign = 1) const;
                 /**
                  * Calculates the confluent hypergeometric function for two orientations of cos(theta*) for symmetrized wave-function
                  * (identical particles)
                  * @param ffp
                  * @param ffm
                  */
-                constexpr void GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const;
+                constexpr void GetFFdouble(double rStar, double cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const;
                 /**
                  * Calculates G~ function
                  * @param eta
@@ -63,17 +63,17 @@
                 constexpr double Funex(double xarg, double rad) const;
                 constexpr void InitializeGamow();
                 constexpr double Gamow(double arg) const;
-                constexpr double GetQuantumCoulombStrong(float rStar, float cosTheta);
+                constexpr double GetQuantumCoulombStrong(double rStar, double cosTheta);
                 /**
                  * @brief Calculates weight for identical bosons
                  * 
                  * @return double
                  */
-                constexpr double GetQuantumCoulomb(float rStar, float cosTheta);
+                constexpr double GetQuantumCoulomb(double rStar, double cosTheta);
 
-                static constexpr float m_gevToFm{5.0677302};
-                static constexpr float m_fmToGeV{1./m_gevToFm};
-                static constexpr float m_mevToGev{0.001};
+                static constexpr double m_gevToFm{5.0677302};
+                static constexpr double m_fmToGeV{1./m_gevToFm};
+                static constexpr double m_mevToGev{0.001};
                 static constexpr double m_pi{3.141592653589793238};
                 static constexpr int fCoulombSteps{170};
 
@@ -93,8 +93,8 @@
                 InteractionTermTPI& operator=(InteractionTermTPI &&) noexcept = default;
 
                 void SetParameters(const std::vector<double> &pars);
-                void SetMomentum(float kStar);
-                [[nodiscard]] double GetValue(float rStar, float cosTheta);
+                void SetMomentum(double kStar);
+                [[nodiscard]] double GetValue(double rStar, double cosTheta);
         };
         
         inline constexpr double InteractionTermTPI::Gamow(double arg) const 

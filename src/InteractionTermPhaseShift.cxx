@@ -37,12 +37,12 @@ namespace JJCorrFitter
         }
     }
 
-    void InteractionTermPhaseShift::SetMomentum(float kStar)
+    void InteractionTermPhaseShift::SetMomentum(double kStar)
     {
         m_kStar = kStar;
     }
     
-    double InteractionTermPhaseShift::GetValue(float rStar, float cosTheta)
+    double InteractionTermPhaseShift::GetValue(double rStar, double cosTheta)
     {
         return m_waveFunction->GetPsiSquared(m_kStar,rStar,cosTheta);
     }

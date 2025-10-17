@@ -104,17 +104,17 @@ namespace JJCorrFitter
         } 
     }
 
-    void InteractionTermTPI::SetMomentum(float kStar)
+    void InteractionTermTPI::SetMomentum(double kStar)
     {
         fKStar = kStar * m_mevToGev * 2;
     }
     
-    double InteractionTermTPI::GetValue(float rStar, float cosTheta)
+    double InteractionTermTPI::GetValue(double rStar, double cosTheta)
     {
         return GetQuantumCoulombStrong(rStar * m_gevToFm, cosTheta);
     }
 
-    constexpr double InteractionTermTPI::GetQuantumCoulombStrong(float rStar, float cosTheta) 
+    constexpr double InteractionTermTPI::GetQuantumCoulombStrong(double rStar, double cosTheta) 
     {
         if (rStar < 0.0000000001)
             return 1.0;
@@ -379,7 +379,7 @@ namespace JJCorrFitter
         return etasum;
     }
 
-    constexpr double InteractionTermTPI::GetQuantumCoulomb(float rStar, float cosTheta) 
+    constexpr double InteractionTermTPI::GetQuantumCoulomb(double rStar, double cosTheta) 
     {
         if (rStar < 0.0000000001) 
             return 1.0;
@@ -486,7 +486,7 @@ namespace JJCorrFitter
         return (0.5 * Gamow(fabs(fKStar)) * (norm(ffplus) + wavesign * sterm.real() + wavesign * tterm.real() + norm(ffminus)));
     }
 
-    constexpr void InteractionTermTPI::GetFFdouble(float rStar, float cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
+    constexpr void InteractionTermTPI::GetFFdouble(double rStar, double cosTheta, std::complex<long double> &ffp, std::complex<long double> &ffm) const 
     {
         std::array<long double,fCoulombSteps> comprep = {};
         std::array<long double,fCoulombSteps> compimp = {};
@@ -568,7 +568,7 @@ namespace JJCorrFitter
         ffm = {comprem[nsteps - 1], compimm[nsteps - 1]};
     }
 
-    constexpr void InteractionTermTPI::GetFFsingle(float rStar, float cosTheta, std::complex<long double> &ffp, int sign) const 
+    constexpr void InteractionTermTPI::GetFFsingle(double rStar, double cosTheta, std::complex<long double> &ffp, int sign) const 
     {
         std::array<double,fCoulombSteps> comprep = {};
         std::array<double,fCoulombSteps> compimp = {};
