@@ -22,8 +22,8 @@ namespace JJCorrFitter
         std::unique_ptr<TH1D> tmp(new TH1D(m_histogramName.data(),m_histogramTitle.data(),m_nPoints,m_minKStar,m_maxKStar));
         for (int bin = 1; bin <= m_nPoints; ++bin)
         {
-            tmp->SetBinContent(bin,params.at(0) * ((params.at(1) * (points.at(bin) - 1)) + 1));
-            tmp->SetBinError(bin,errors.at(bin));
+            tmp->SetBinContent(bin,params.at(0) * ((params.at(1) * (points.at(bin - 1) - 1)) + 1));
+            tmp->SetBinError(bin,errors.at(bin - 1));
         }
             
         return tmp;
@@ -31,11 +31,10 @@ namespace JJCorrFitter
 
     std::vector<double> CorrelationFunction1D::SetKStarPoints(double start, double stop, int nPoints)
     {
-        std::vector<double> tmp(nPoints+1);
+        std::vector<double> tmp(nPoints,0.);
         const double step = (stop - start) / nPoints;
-
-        for (int i = 0; i <= nPoints; ++i)
-            tmp[i] = start + i*step;
+        std::size_t counter = -1;
+        std::generate(tmp.begin(),tmp.end(),[&start,&step,&counter]{ return start + (++counter) * step + 0.5 * step;});
 
         std::vector<double> tmp2 = tmp;
         tmp2.insert(tmp2.end(),m_normalisationPoints.begin(),m_normalisationPoints.end());
@@ -140,10 +139,9 @@ namespace JJCorrFitter
         m_correlationErrors.clear();
         m_correlationErrors.resize(0);
 
-        for (int bin = 0; bin <= m_nPoints; ++bin)
+        for (int bin = 0; bin < m_nPoints; ++bin)
         {
-            double val, err;
-            std::tie(val,err) = CalculatePoint(m_kStarValues.at(bin));   
+            const auto [val,err] = CalculatePoint(m_kStarValues.at(bin));   
             m_correlationPoints.push_back(val);
             m_correlationErrors.push_back(err);
         }

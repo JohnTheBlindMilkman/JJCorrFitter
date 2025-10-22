@@ -4,83 +4,181 @@ namespace JJCorrFitter
 {
     CorrelationFunction3D::CorrelationFunction3D(std::unique_ptr<SourceFunctionImpl> &&source, std::unique_ptr<InteractionTermImpl> &&interact) :
     m_minKStar(0), m_maxKStar(500), m_nPoints(100), 
-    m_histogramName("hCF_fit"), m_histogramTitle(""), m_kStarValues(m_nPoints)
+    m_histogramName("hCF_fit"), m_histogramTitle("")
     {
-        m_correlationFunctionName = "1D";
+        m_correlationFunctionName = "3D";
         m_sourceFunction = std::exchange(source,nullptr);
         m_interactionTerm = std::exchange(interact,nullptr);
-        m_correlationPoints = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
-        m_correlationErrors = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
+        m_correlationPoints = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
+        m_correlationErrors = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
         m_kStarValues = SetKStarPoints(m_minKStar,m_maxKStar,m_nPoints);
 
         m_numberOfParams = 2;
         m_totalNumberOfParams = m_numberOfParams + m_sourceFunction->GetNParams() + m_interactionTerm->GetNParams();
     }
 
-    std::unique_ptr<TH3D> CorrelationFunction3D::MakeHistogram(const std::vector<std::vector<std::vector<double> > > &points, const std::vector<std::vector<std::vector<double> > > &errors, const std::vector<double> &params)
+    std::unique_ptr<TH3D> CorrelationFunction3D::MakeHistogram(const Grid<double> &points, const Grid<double> &errors, const std::vector<double> &params)
     {
         std::unique_ptr<TH3D> tmp(new TH3D(m_histogramName.data(),m_histogramTitle.data(),m_nPoints,m_minKStar,m_maxKStar,m_nPoints,m_minKStar,m_maxKStar,m_nPoints,m_minKStar,m_maxKStar));
         for (int i = 1; i <= m_nPoints; ++i)
             for (int j = 1; j <= m_nPoints; ++j)
                 for (int k = 1; k <= m_nPoints; ++k)
                 {
-                    if (std::isnan(points.at(i).at(j).at(k)) /* || std::isnan(errors.at(i).at(j).at(k)) */)
+                    if (std::isnan(points(i - 1, j - 1, k - 1)))
                     {
                         tmp->SetBinContent(i,j,k,0.);
                         tmp->SetBinError(i,j,k,0.);
                     }
                     else
                     {
-                        tmp->SetBinContent(i,j,k,params.at(0) * ((params.at(1) * (points.at(i).at(j).at(k) - 1)) + 1));
-                        tmp->SetBinError(i,j,k,errors.at(i).at(j).at(k));
+                        tmp->SetBinContent(i,j,k,params.at(0) * ((params.at(1) * (points(i - 1, j - 1, k - 1) - 1)) + 1));
+                        tmp->SetBinError(i,j,k,errors(i - 1, j - 1, k - 1));
                     }
                 }
             
         return tmp;
     }
 
-    std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > CorrelationFunction3D::SetKStarPoints(float start, float stop, int nPoints)
+    Grid<std::tuple<float,float,float> > CorrelationFunction3D::SetKStarPoints(float start, float stop, int nPoints)
     {
-        std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > tmp(nPoints+1,std::vector<std::vector<std::tuple<float,float,float> > >(nPoints+1,std::vector<std::tuple<float,float,float> >(nPoints+1,std::make_tuple(0.,0.,0.))));
+        // const std::size_t nNormPoints = m_normalisationPoints.size();
+
+        Grid<std::tuple<float,float,float> > tmp(nPoints,nPoints,nPoints);
+        // Grid<std::tuple<double,double,double> > momGrid(nPoints + 1 + nNormPoints, nPoints + 1 + nNormPoints, nPoints + 1 + nNormPoints);
         const float step = (stop - start) / nPoints;
 
-        for (int i = 0; i <= nPoints; ++i)
-            for (int j = 0; j <= nPoints; ++j)
-                for (int k = 0; k <= nPoints; ++k)
-                    tmp.at(i).at(j).at(k) = std::make_tuple(start + i*step,start + j*step,start + k*step);
+        constexpr double momBegin = 0.5;
+        constexpr double momStep = 1;
+        std::size_t momCounter = -1;
+        std::vector<double> momBins(500,0.);
+        // momBins.reserve(momGrid.size());
+        std::generate(momBins.begin(),momBins.end(),[&momBegin,&momStep,&momCounter]{return momBegin + momStep * (++momCounter);});
+        for (const auto &qOut : m_normalisationPoints)
+            for (const auto &qSide : m_normalisationPoints)
+                for (const auto &qLong : m_normalisationPoints)
+                    momBins.push_back(CalculateModulus(qOut,qSide,qLong));
+
+        std::sort(momBins.begin(),momBins.end());
+        momBins.erase(
+            std::unique(
+                momBins.begin(),
+                momBins.end(),
+                [](const double &a, const double &b) -> bool
+                {
+                    return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
+                }),
+            momBins.end());
+
+        for (int i = 0; i < nPoints; ++i)
+            for (int j = 0; j < nPoints; ++j)
+                for (int k = 0; k < nPoints; ++k)
+                {
+                    tmp(i,j,k) = std::make_tuple(start + i * step + 0.5 * step,start + j * step + 0.5 * step,start + k * step + 0.5 * step);
+                    // momGrid(i,j,k) = std::make_tuple(start + i*step,start + j*step,start + k*step);
+                    // momBins.push_back(CalculateModulus(start + i*step,start + j*step,start + k*step));
+                }
+
+        // for (std::size_t i = nPoints + 1; i < nPoints + 1 + nNormPoints; ++i)
+        //     for (std::size_t j = nPoints + 1; j < nPoints + 1 + nNormPoints; ++j)
+        //         for (std::size_t k = nPoints + 1; k < nPoints + 1 + nNormPoints; ++k)
+        //         {
+        //             momGrid(i,j,k) = std::make_tuple(m_normalisationPoints[i],m_normalisationPoints[j],m_normalisationPoints[k]);
+        //             momBins.push_back(CalculateModulus(m_normalisationPoints[i],m_normalisationPoints[j],m_normalisationPoints[k]));
+        //         }
+
+        // std::sort(momBins.begin(),momBins.end());
+        // momBins.erase(
+        //     std::unique(
+        //         momBins.begin(),
+        //         momBins.end(),
+        //         [](const double &a, const double &b) -> bool
+        //         {
+        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
+        //         }),
+        //     momBins.end());
+
+        // auto rOutSamples = CalculateIntSamplePoints(m_rIntRange,boost::math::quadrature::gauss_kronrod<double,61>::abscissa());
+        // auto rSideSamples = CalculateIntSamplePoints(m_rIntRange,boost::math::quadrature::gauss<double,30>::abscissa());
+        // auto rLongSamples = rSideSamples;
+        // Grid<std::tuple<double,double,double> > rGrid(rOutSamples.size(),rSideSamples.size(),rLongSamples.size());
+        constexpr double rBegin = 0.5;
+        constexpr double rStep = 0.5;
+        std::size_t rCounter = -1;
+        std::vector<double> rBins(200);
+        std::generate(rBins.begin(),rBins.end(),[&rBegin,&rStep,&rCounter]{return rBegin + rStep * (++rCounter);});
+        // rBins.reserve(rOutSamples.size() + rSideSamples.size() + rLongSamples.size());
+        // for (std::size_t iOut = 0; iOut < rOutSamples.size(); ++iOut)
+        //     for (std::size_t iSide = 0; iSide < rSideSamples.size(); ++iSide)
+        //         for (std::size_t iLong = 0; iLong < rLongSamples.size(); ++iLong)
+        //         {
+        //             rGrid(iOut,iSide,iLong) = std::make_tuple(rOutSamples[iOut],rSideSamples[iSide],rLongSamples[iLong]);
+        //             rBins.push_back(CalculateModulus(rOutSamples[iOut],rSideSamples[iSide],rLongSamples[iLong]));
+        //         }
+
+        // std::sort(rBins.begin(),rBins.end());
+        // rBins.erase(
+        //     std::unique(
+        //         rBins.begin(),
+        //         rBins.end(),
+        //         [](const double &a, const double &b)
+        //         {
+        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
+        //         }),
+        //     rBins.end());
+
+        constexpr std::size_t elems = 200;
+        constexpr double stepCt = 2. / elems;
+        std::size_t counter = 0;
+        std::vector<double> ctBins(elems,0.);
+        std::generate(ctBins.begin(),ctBins.end(),[&stepCt,&counter]{return -1 + (++counter) * stepCt;});
+        ctBins.push_back(1 + stepCt);
+        // ctBins.reserve(momGrid.size() * rBins.size());
+        // for (const auto &[qOut,qSide,qLong] : momGrid)
+        //     for (const auto &[rOut,rSide,rLong] : rGrid)
+        //         ctBins.push_back(CalculateCosTheta(qOut,qSide,qLong,rOut,rSide,rLong));
+
+        // std::sort(ctBins.begin(),ctBins.end());
+        // ctBins.erase(
+        //     std::unique(
+        //         ctBins.begin(),
+        //         ctBins.end(),
+        //         [](const double &a, const double &b)
+        //         {
+        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
+        //         }),
+        //     ctBins.end());
+        
+        m_interactionTerm->SetMomentumBins(std::move(momBins));
+        m_interactionTerm->SetDistanceBins(std::move(rBins));
+        m_interactionTerm->SetCosThetaBins(std::move(ctBins));
+        m_interactionTerm->PopulateGrid();
 
         return tmp;
     }
 
-    void CorrelationFunction3D::NormaliseFunction(std::vector<std::vector<std::vector<double> > > &points, std::vector<std::vector<std::vector<double> > > &errors)
+    void CorrelationFunction3D::NormaliseFunction(Grid<double> &points, Grid<double> &errors)
     {
+        std::size_t counter = 0;
         double sum = 0;
         for (const double &binX : m_normalisationPoints)
             for (const double &binY : m_normalisationPoints)
                 for (const double &binZ : m_normalisationPoints)
                 {
-                    //for now I don't know how to get around this
-/*                     if (binX < m_maxKStar || binY < m_maxKStar || binZ < m_maxKStar)
+                    const auto [val,err] = CalculatePoint(binX,binY,binZ);
+                    if (!std::isnan(val))
                     {
-                        sum += points.at(std::lower_bound(m_kStarValues.begin(),m_kStarValues.end(),binX) - m_kStarValues.begin())
-                            .at(std::lower_bound(m_kStarValues.begin(),m_kStarValues.end(),binY) - m_kStarValues.begin())
-                            .at(std::lower_bound(m_kStarValues.begin(),m_kStarValues.end(),binZ) - m_kStarValues.begin());
+                        sum += val;
+                        ++counter;
                     }
-                    else
-                    { */
-                        double val, err;
-                        std::tie(val,err) = CalculatePoint(binX,binY,binZ);
-                        if (!std::isnan(val))
-                            sum += val;
-                    //}
                 }
-        for (int i = 0; i <= m_nPoints; ++i)
-            for (int j = 0; j <= m_nPoints; ++j)
-                for (int k = 0; k <= m_nPoints; ++k)
-                {
-                    points.at(i).at(j).at(k) *= (std::pow(m_normalisationPoints.size(),3)/sum);
-                    errors.at(i).at(j).at(k) *= (std::pow(m_normalisationPoints.size(),3)/sum);
-                }
+
+        if (sum > 0)
+        {
+            for (auto &point : points)
+                point *= counter / sum;
+            for (auto &error : errors)
+                error *= counter / sum;
+        }
     }
 
     std::pair<double,double> CorrelationFunction3D::CalculatePoint()
@@ -106,13 +204,13 @@ namespace JJCorrFitter
                 {
                     return kooninPratt(rOut,rSide,rLong);
                 };
-                return gauss<double,30>::integrate(h,0.,std::numeric_limits<double>::infinity());
+                return gauss<double,30>::integrate(h,m_rIntRange.first,m_rIntRange.second);
             };
-            return gauss<double,30>::integrate(g,0.,std::numeric_limits<double>::infinity());
+            return gauss<double,30>::integrate(g,m_rIntRange.first,m_rIntRange.second);
         };
 
         double error = 0.;
-        double result = gauss_kronrod<double,61>::integrate(f,0.,std::numeric_limits<double>::infinity(),0,0,&error);
+        double result = gauss_kronrod<double,61>::integrate(f,m_rIntRange.first,m_rIntRange.second,0,0,&error);
         return std::make_pair(result,error);
     }
 
@@ -126,7 +224,7 @@ namespace JJCorrFitter
         return std::sqrt(xOut*xOut + xSide*xSide + xLong*xLong);
     }
 
-    void CorrelationFunction3D::SetBinning(const std::unique_ptr<TH1> &data, float minKstar, float maxKstar)
+    void CorrelationFunction3D::SetBinning(const std::unique_ptr<TH1> &data, double minKstar, double maxKstar)
     {
         if (minKstar > maxKstar)
             throw std::logic_error("CorrelationFunction3D::SetBinning - minimal value of k* is greater than the maximal value");
@@ -134,19 +232,19 @@ namespace JJCorrFitter
         m_histogramName = std::string(data->GetName()) + "_fit";
         m_histogramTitle = std::string(data->GetTitle());
 
-        const int minBin = (minKstar < 0) ? 0 : data->FindBin(minKstar);
-        const int maxBin = (maxKstar < 0) ? data->GetNbinsX() : data->FindBin(maxKstar);
+        const int minBin = (minKstar < 0) ? 0 : data->GetXaxis()->FindBin(minKstar);
+        const int maxBin = (maxKstar < 0) ? data->GetNbinsX() : data->GetXaxis()->FindBin(maxKstar);
 
-        m_minKStar = data->GetBinLowEdge(minBin);
-        m_maxKStar = data->GetBinLowEdge(maxBin);
+        m_minKStar = data->GetXaxis()->GetBinLowEdge(minBin);
+        m_maxKStar = data->GetXaxis()->GetBinLowEdge(maxBin);
         m_nPoints = maxBin - minBin;
 
         m_kStarValues = SetKStarPoints(m_minKStar,m_maxKStar,m_nPoints);
-        m_correlationPoints = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
-        m_correlationErrors = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
+        m_correlationPoints = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
+        m_correlationErrors = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
     }
 
-    void CorrelationFunction3D::SetBinning(const std::string &name, const std::string &title, int nPoints, float minKstar, float maxKstar)
+    void CorrelationFunction3D::SetBinning(const std::string &name, const std::string &title, int nPoints, double minKstar, double maxKstar)
     {
         if (minKstar > maxKstar)
             throw std::logic_error("CorrelationFunction3D::SetBinning - minimal value of k* is greater than the maximal value");
@@ -158,53 +256,60 @@ namespace JJCorrFitter
         m_maxKStar = maxKstar;
 
         m_kStarValues = SetKStarPoints(m_minKStar,m_maxKStar,m_nPoints);
-        m_correlationPoints = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
-        m_correlationErrors = std::vector<std::vector<std::vector<double> > >(m_nPoints+1,std::vector<std::vector<double> >(m_nPoints+1,std::vector<double>(m_nPoints+1,0.)));
+        m_correlationPoints = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
+        m_correlationErrors = Grid<double>(m_nPoints+1,m_nPoints+1,m_nPoints+1);
     }
 
     std::unique_ptr<TH1> CorrelationFunction3D::Evaluate()
     {
         std::size_t counter = 0;
-        double val, err, kx, ky, kz;
-        /* for (int i = 0; i <= m_nPoints; ++i)
-            for (int j = 0; j <= m_nPoints; ++j)
-                for (int k = 0; k <= m_nPoints; ++k)
+        for (int i = 0; i < m_nPoints; ++i)
+            for (int j = 0; j < m_nPoints; ++j)
+                for (int k = 0; k < m_nPoints; ++k)
                 {
-                    std::tie(kx,ky,kz) = m_kStarValues.at(i).at(j).at(k);
-                    std::tie(val,err) = CalculatePoint(kx,ky,kz);   
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);   
                     std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-                    m_correlationPoints.at(i).at(j).at(k) = val;
-                    m_correlationErrors.at(i).at(j).at(k) = err;
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
                     ++counter;
-                } */
+                }
 
-        for (int i = 0; i <= m_nPoints; ++i)
+        NormaliseFunction(m_correlationPoints,m_correlationErrors); 
+
+        return MakeHistogram(m_correlationPoints,m_correlationErrors,m_corrFuncParams);
+    }
+
+    std::unique_ptr<TH1> CorrelationFunction3D::EvaluateAtEdges()
+    {
+        std::size_t counter = 0;
+        for (int i = 0; i < m_nPoints; ++i)
         {
-            std::tie(kx,ky,kz) = m_kStarValues.at(i).at(1).at(1);
-            std::tie(val,err) = CalculatePoint(kx,ky,kz);
+            const auto &[kx,ky,kz] = m_kStarValues(i,0,0);
+            const auto [val,err] = CalculatePoint(kx,ky,kz);
             std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints.at(i).at(1).at(1) = val;
-            m_correlationErrors.at(i).at(1).at(1) = err;
+            m_correlationPoints(i,0,0) = val;
+            m_correlationErrors(i,0,0) = err;
             ++counter;
         }
 
-        for (int j = 0; j <= m_nPoints; ++j)
+        for (int j = 0; j < m_nPoints; ++j)
         {
-            std::tie(kx,ky,kz) = m_kStarValues.at(1).at(j).at(1);
-            std::tie(val,err) = CalculatePoint(kx,ky,kz);   
+            const auto &[kx,ky,kz] = m_kStarValues(0,j,0);
+            const auto [val,err] = CalculatePoint(kx,ky,kz);   
             std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints.at(1).at(j).at(1) = val;
-            m_correlationErrors.at(1).at(j).at(1) = err;
+            m_correlationPoints(0,j,0) = val;
+            m_correlationErrors(0,j,0) = err;
             ++counter;
         }
 
-        for (int k = 0; k <= m_nPoints; ++k)
+        for (int k = 0; k < m_nPoints; ++k)
         {
-            std::tie(kx,ky,kz) = m_kStarValues.at(1).at(1).at(k);
-            std::tie(val,err) = CalculatePoint(kx,ky,kz);   
+            const auto &[kx,ky,kz] = m_kStarValues(0,0,k);
+            const auto [val,err] = CalculatePoint(kx,ky,kz);   
             std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints.at(1).at(1).at(k) = val;
-            m_correlationErrors.at(1).at(1).at(k) = err;
+            m_correlationPoints(0,0,k) = val;
+            m_correlationErrors(0,0,k) = err;
             ++counter;
         }
 

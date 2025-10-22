@@ -4,6 +4,10 @@ if(JJCORRFITTER_ENABLE_TESTS)
     target_link_libraries(draw1DCF PRIVATE JJCorrFitter)
     target_compile_features(draw1DCF  PRIVATE cxx_std_17)
 
+    add_executable(draw3DCF testCF3D.cxx)
+    target_link_libraries(draw3DCF PRIVATE JJCorrFitter)
+    target_compile_features(draw3DCF  PRIVATE cxx_std_17)
+
     add_executable(calcMomRes1D testMomRes.cxx)
     target_link_libraries(calcMomRes1D PRIVATE JJCorrFitter)
     target_compile_features(calcMomRes1D  PRIVATE cxx_std_17)
