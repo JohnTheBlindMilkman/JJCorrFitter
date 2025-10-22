@@ -41,17 +41,13 @@ namespace JJCorrFitter
 
     Grid<std::tuple<float,float,float> > CorrelationFunction3D::SetKStarPoints(float start, float stop, int nPoints)
     {
-        // const std::size_t nNormPoints = m_normalisationPoints.size();
-
         Grid<std::tuple<float,float,float> > tmp(nPoints,nPoints,nPoints);
-        // Grid<std::tuple<double,double,double> > momGrid(nPoints + 1 + nNormPoints, nPoints + 1 + nNormPoints, nPoints + 1 + nNormPoints);
         const float step = (stop - start) / nPoints;
 
         constexpr double momBegin = 0.5;
         constexpr double momStep = 1;
         std::size_t momCounter = -1;
         std::vector<double> momBins(500,0.);
-        // momBins.reserve(momGrid.size());
         std::generate(momBins.begin(),momBins.end(),[&momBegin,&momStep,&momCounter]{return momBegin + momStep * (++momCounter);});
         for (const auto &qOut : m_normalisationPoints)
             for (const auto &qSide : m_normalisationPoints)
@@ -74,57 +70,13 @@ namespace JJCorrFitter
                 for (int k = 0; k < nPoints; ++k)
                 {
                     tmp(i,j,k) = std::make_tuple(start + i * step + 0.5 * step,start + j * step + 0.5 * step,start + k * step + 0.5 * step);
-                    // momGrid(i,j,k) = std::make_tuple(start + i*step,start + j*step,start + k*step);
-                    // momBins.push_back(CalculateModulus(start + i*step,start + j*step,start + k*step));
                 }
 
-        // for (std::size_t i = nPoints + 1; i < nPoints + 1 + nNormPoints; ++i)
-        //     for (std::size_t j = nPoints + 1; j < nPoints + 1 + nNormPoints; ++j)
-        //         for (std::size_t k = nPoints + 1; k < nPoints + 1 + nNormPoints; ++k)
-        //         {
-        //             momGrid(i,j,k) = std::make_tuple(m_normalisationPoints[i],m_normalisationPoints[j],m_normalisationPoints[k]);
-        //             momBins.push_back(CalculateModulus(m_normalisationPoints[i],m_normalisationPoints[j],m_normalisationPoints[k]));
-        //         }
-
-        // std::sort(momBins.begin(),momBins.end());
-        // momBins.erase(
-        //     std::unique(
-        //         momBins.begin(),
-        //         momBins.end(),
-        //         [](const double &a, const double &b) -> bool
-        //         {
-        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
-        //         }),
-        //     momBins.end());
-
-        // auto rOutSamples = CalculateIntSamplePoints(m_rIntRange,boost::math::quadrature::gauss_kronrod<double,61>::abscissa());
-        // auto rSideSamples = CalculateIntSamplePoints(m_rIntRange,boost::math::quadrature::gauss<double,30>::abscissa());
-        // auto rLongSamples = rSideSamples;
-        // Grid<std::tuple<double,double,double> > rGrid(rOutSamples.size(),rSideSamples.size(),rLongSamples.size());
         constexpr double rBegin = 0.5;
         constexpr double rStep = 0.5;
         std::size_t rCounter = -1;
         std::vector<double> rBins(200);
         std::generate(rBins.begin(),rBins.end(),[&rBegin,&rStep,&rCounter]{return rBegin + rStep * (++rCounter);});
-        // rBins.reserve(rOutSamples.size() + rSideSamples.size() + rLongSamples.size());
-        // for (std::size_t iOut = 0; iOut < rOutSamples.size(); ++iOut)
-        //     for (std::size_t iSide = 0; iSide < rSideSamples.size(); ++iSide)
-        //         for (std::size_t iLong = 0; iLong < rLongSamples.size(); ++iLong)
-        //         {
-        //             rGrid(iOut,iSide,iLong) = std::make_tuple(rOutSamples[iOut],rSideSamples[iSide],rLongSamples[iLong]);
-        //             rBins.push_back(CalculateModulus(rOutSamples[iOut],rSideSamples[iSide],rLongSamples[iLong]));
-        //         }
-
-        // std::sort(rBins.begin(),rBins.end());
-        // rBins.erase(
-        //     std::unique(
-        //         rBins.begin(),
-        //         rBins.end(),
-        //         [](const double &a, const double &b)
-        //         {
-        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
-        //         }),
-        //     rBins.end());
 
         constexpr std::size_t elems = 200;
         constexpr double stepCt = 2. / elems;
@@ -132,22 +84,7 @@ namespace JJCorrFitter
         std::vector<double> ctBins(elems,0.);
         std::generate(ctBins.begin(),ctBins.end(),[&stepCt,&counter]{return -1 + (++counter) * stepCt;});
         ctBins.push_back(1 + stepCt);
-        // ctBins.reserve(momGrid.size() * rBins.size());
-        // for (const auto &[qOut,qSide,qLong] : momGrid)
-        //     for (const auto &[rOut,rSide,rLong] : rGrid)
-        //         ctBins.push_back(CalculateCosTheta(qOut,qSide,qLong,rOut,rSide,rLong));
 
-        // std::sort(ctBins.begin(),ctBins.end());
-        // ctBins.erase(
-        //     std::unique(
-        //         ctBins.begin(),
-        //         ctBins.end(),
-        //         [](const double &a, const double &b)
-        //         {
-        //             return std::abs(a - b) <= std::sqrt(std::max(std::abs(a),std::abs(b)) * std::numeric_limits<double>::epsilon());
-        //         }),
-        //     ctBins.end());
-        
         m_interactionTerm->SetMomentumBins(std::move(momBins));
         m_interactionTerm->SetDistanceBins(std::move(rBins));
         m_interactionTerm->SetCosThetaBins(std::move(ctBins));
