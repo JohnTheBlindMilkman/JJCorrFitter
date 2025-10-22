@@ -19,22 +19,23 @@
     #include "gsl/gsl_sf_legendre.h"
 
     #include "CorrelationFunctionImpl.hxx"
+    #include "Grid.hxx"
 
     namespace JJCorrFitter
     {
         class CorrelationFunction3D : public CorrelationFunctionImpl
         {
             private:
-                float m_minKStar,m_maxKStar;
+                double m_minKStar,m_maxKStar;
                 int m_nPoints;
                 std::string m_histogramName, m_histogramTitle;
-                std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > m_kStarValues;
-                std::vector<std::vector<std::vector<double> > > m_correlationPoints, m_correlationErrors;
+                Grid<std::tuple<float,float,float> > m_kStarValues;
+                Grid<double> m_correlationPoints, m_correlationErrors;
 
-                [[nodiscard]] std::unique_ptr<TH3D> MakeHistogram(const std::vector<std::vector<std::vector<double> > > &points, const std::vector<std::vector<std::vector<double> > > &errors, const std::vector<double> &params);
-                [[nodiscard]] std::vector<std::vector<std::vector<std::tuple<float,float,float> > > > SetKStarPoints(float start, float stop, int nPoints);
-                void NormaliseFunction(std::vector<double> &points, std::vector<double> &errors) {}
-                void NormaliseFunction(std::vector<std::vector<std::vector<double> > > &points, std::vector<std::vector<std::vector<double> > > &errors);
+                [[nodiscard]] std::unique_ptr<TH3D> MakeHistogram(const Grid<double> &points, const Grid<double> &errors, const std::vector<double> &params);
+                [[nodiscard]] Grid<std::tuple<float,float,float> > SetKStarPoints(float start, float stop, int nPoints);
+                void NormaliseFunction([[maybe_unused]] std::vector<double> &points,[[maybe_unused]] std::vector<double> &errors) {}
+                void NormaliseFunction(Grid<double> &points, Grid<double> &errors);
                 [[nodiscard]] std::pair<double,double> CalculatePoint();
                 [[nodiscard]] std::pair<double,double> CalculatePoint(float kOut,float kSide,float kLong);
                 [[nodiscard]] constexpr double CalculateCosTheta(float kOut,float kSide,float kLong, float rOut,float rSide,float rLong) noexcept;
@@ -49,9 +50,10 @@
                 CorrelationFunction3D(CorrelationFunction3D&&) noexcept = default;
                 CorrelationFunction3D& operator=(CorrelationFunction3D&&) noexcept = default;
 
-                void SetBinning(const std::unique_ptr<TH1> &data, float minKstar = -1, float maxKstar = -1);
-                void SetBinning(const std::string &name, const std::string &title, int nPoints, float minKStar, float maxKstar);
+                void SetBinning(const std::unique_ptr<TH1> &data, double minKstar = -1, double maxKstar = -1);
+                void SetBinning(const std::string &name, const std::string &title, int nPoints, double minKStar, double maxKstar);
                 [[nodiscard]] std::unique_ptr<TH1> Evaluate();
+                [[nodiscard]] std::unique_ptr<TH1> EvaluateAtEdges();
                 void SetParameters(const std::vector<double> &generalPars,const std::vector<double> &srcPars,const std::vector<double> &psiPars);
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
                 [[nodiscard]] std::unique_ptr<TH1> GetCorrelationFunction();

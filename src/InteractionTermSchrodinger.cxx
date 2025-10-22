@@ -61,7 +61,24 @@ namespace JJCorrFitter
         for (std::size_t qBin = 0; qBin < qSize; ++qBin)
             for (std::size_t rBin = 0; rBin < rSize; ++rBin)
                 for (std::size_t ctBin = 0; ctBin < ctSize; ++ctBin)
-                    m_grid(qBin,rBin,ctBin) = m_waveFunction.GetPsiSquared(m_qPoints.at(qBin),m_rPoints.at(rBin),m_ctPoints.at(ctBin));
+                {
+                    const double q = m_qPoints.at(qBin);
+                    const double r = m_rPoints.at(rBin);
+                    const double cosTheta = m_ctPoints.at(ctBin);
+                    if (q < 2 || r < 1)
+                    { 
+                        m_grid(qBin,rBin,ctBin) = 0;
+                    }
+                    else if (q > 500 || r > 100)
+                    {
+                        m_grid(qBin,rBin,ctBin) = 1;
+                    }
+                    else
+                    {
+                        m_grid(qBin,rBin,ctBin) = m_waveFunction.GetPsiSquared(q,r,(cosTheta < -1) ? -1 : (cosTheta > 1) ? 1 : cosTheta); // limiting the value to stay within (-1,1)
+                    }
+                    
+                }
     }
 
 } // namespace JJCorrFitter

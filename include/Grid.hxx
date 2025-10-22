@@ -28,17 +28,23 @@
                 Grid() : m_nX(0), m_nY(0), m_nZ(0), m_data({}) {}
                 Grid(std::size_t nX, std::size_t nY, std::size_t nZ) : m_nX(nX), m_nY(nY), m_nZ(nZ), m_data(m_nX * m_nY * m_nZ, T()) {}
                 [[nodiscard]] T& operator()(std::size_t x, std::size_t y, std::size_t z) noexcept {return m_data[x + m_nX * y + m_nX * m_nY * z];}
+                [[nodiscard]] const T& operator()(std::size_t x, std::size_t y, std::size_t z) const noexcept {return m_data[x + m_nX * y + m_nX * m_nY * z];}
                 [[nodiscard]] const T& at(std::size_t x, std::size_t y, std::size_t z) const 
                 {
                     if (x >= m_nX || y >= m_nY || z >= m_nZ)
                     {
                         std::stringstream ss;
-                        ss << "GRID<T>::operator(): index out of bounds: x = " << x << " (max is " << m_nX - 1 << "), y = " << y << " (max is " << m_nY - 1 << "), z = " << z << " (max is " << m_nZ - 1 << ")";
+                        ss << "Grid<T>::at(): index out of bounds: x = " << x << " (max is " << m_nX - 1 << "), y = " << y << " (max is " << m_nY - 1 << "), z = " << z << " (max is " << m_nZ - 1 << ")";
                         throw std::out_of_range(ss.str().c_str());
                     }
 
                     return m_data.at(x + m_nX * y + m_nX * m_nY * z);
                 }
+                auto begin() {return m_data.begin();}
+                auto end() {return m_data.end();}
+                auto begin() const {return m_data.begin();}
+                auto end() const {return m_data.end();}
+                [[nodiscard]] std::size_t size() const noexcept {return m_nX * m_nY * m_nZ;}
         };
     } // namespace JJCorrFitter
     
