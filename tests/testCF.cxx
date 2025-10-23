@@ -1,5 +1,6 @@
 #include "TFile.h"
 #include "TCanvas.h"
+#include "TLine.h"
 #include "CorrelationFunction1D.hxx"
 #include "CorrelationFunction3D.hxx"
 #include "SourceFunction1D.hxx"
@@ -30,8 +31,8 @@ int main()
     std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
     c->SetMargin(0.15,0.02,0.15,0.02);
 
-    func1.SetBinning(hist,0,200);
-    func1.SetParameters({1.02078,1.},{3.2026},{});
+    func1.SetBinning(hist,0,500);
+    func1.SetParameters({1.,1.},{3.2026},{});
     func1.Evaluate()->Write("hQinvRatInteg_fitGauss");
 
     JJCorrFitter::CorrelationFunction1D func2(
@@ -39,8 +40,8 @@ int main()
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
         );
 
-    func2.SetBinning(hist,0,200);
-    func2.SetParameters({0.996768,1.},{2.94521},{});
+    func2.SetBinning(hist,0,500);
+    func2.SetParameters({1.,1.},{2.94521},{});
     func2.Evaluate()->Write("hQinvRatInteg_fitCauchy");
 
     JJCorrFitter::CorrelationFunction1D func3(
@@ -48,9 +49,12 @@ int main()
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
         );
 
-    func3.SetBinning(hist,0,200);
-    func3.SetParameters({1.00859,1.},{2.35467,5.05293},{});
+    func3.SetBinning(hist,0,500);
+    func3.SetParameters({1.,1.},{2.35467,5.05293},{});
     func3.Evaluate()->Write("hQinvRatInteg_fitDoubleGauss");
+
+    TLine line(0,1,500,1);
+    line.Write();
 
     otp->Save();
     otp->Close();

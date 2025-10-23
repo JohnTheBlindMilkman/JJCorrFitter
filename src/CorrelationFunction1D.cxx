@@ -54,12 +54,11 @@ namespace JJCorrFitter
         {
             if (bin < m_maxKStar)
             {
-                sum += points.at(std::lower_bound(m_kStarValues.begin(),m_kStarValues.end(),bin) - m_kStarValues.begin());
+                sum += points.at(std::distance(m_kStarValues.begin(),std::lower_bound(m_kStarValues.begin(),m_kStarValues.end(),bin)));
             }
             else
             {
-                double val, err;
-                std::tie(val,err) = CalculatePoint(bin);
+                const auto [val,err] = CalculatePoint(bin);
                 sum += val;
             }
         }
@@ -90,11 +89,11 @@ namespace JJCorrFitter
             {
                 return kooninPratt(r,ctheta);
             };
-            return gauss<double,30>::integrate(g,-1,1);
+            return gauss<double,30>::integrate(g,m_cosThetaIntRange.first,m_cosThetaIntRange.second);
         };
 
         double error = 0.;
-        double result = gauss_kronrod<double,61>::integrate(f,0.,50.,0,0,&error); // should be 0 to inf, but nothing happens above ~20 fm
+        double result = gauss_kronrod<double,61>::integrate(f,m_rIntRange.first,m_rIntRange.second,0,0,&error); // should be 0 to inf, but nothing happens above ~20 fm
         return std::make_pair(result,error);
     }
 
@@ -113,6 +112,8 @@ namespace JJCorrFitter
         m_maxKStar = data->GetBinLowEdge(maxBin);
         m_nPoints = maxBin - minBin;
 
+        m_correlationPoints.reserve(m_nPoints);
+        m_correlationErrors.reserve(m_nPoints);
         m_kStarValues = SetKStarPoints(m_minKStar,m_maxKStar,m_nPoints);
     }
 

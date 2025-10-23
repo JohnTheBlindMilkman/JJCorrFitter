@@ -69,10 +69,6 @@ namespace JJCorrFitter
                     { 
                         m_grid(qBin,rBin,ctBin) = 0;
                     }
-                    else if (q > 500 || r > 100)
-                    {
-                        m_grid(qBin,rBin,ctBin) = 1;
-                    }
                     else
                     {
                         m_grid(qBin,rBin,ctBin) = m_waveFunction.GetPsiSquared(q,r,(cosTheta < -1) ? -1 : (cosTheta > 1) ? 1 : cosTheta); // limiting the value to stay within (-1,1)

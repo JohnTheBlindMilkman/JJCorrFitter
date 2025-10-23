@@ -54,7 +54,14 @@ int main()
         //std::make_unique<JJCorrFitter::InteractionTermTPI>(JJCorrFitter::InteractionTermTPI::SpinState::None)
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
-    func->SetBinning(hist,4,80);
+    func->SetBinning(hist,12,80);
+
+    JJCorrFitter::CorrelationFunction1D func2
+    (
+        std::make_unique<JJCorrFitter::CauchySource1D>(),
+        std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
+    );
+    func2.SetBinning(hist,hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
 
     // create fitter object
     JJCorrFitter::Fitter fitter
@@ -100,6 +107,12 @@ int main()
         tpt->AddText(TString::Format("%s = %lf +/- %lf",parNames.at(i).c_str(),params.at(i),errors.at(i)));
     }
 
+    func2.SetParameters({params[0],params[1]},{params[2]},{});
+    auto cfFull = func2.Evaluate();
+    cfFull->SetName("fitFullInteg");
+    cfFull->SetLineColor(JJColor::fWutSecondaryColors[3]);
+    cfFull->SetLineStyle(kDashed);
+
     std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
     c->SetMargin(0.15,0.02,0.15,0.02);
     JJColor::CreatePrimaryWutGradient();
@@ -107,12 +120,14 @@ int main()
     hist->Draw();
     cf->SetLineColor(JJColor::fWutSecondaryColors[3]);
     cf->Draw("c same");
+    cfFull->Draw("c same");
     tpt->Draw("same");
 
     std::unique_ptr<TFile> otp(TFile::Open("fit1DCF.root","recreate"));
     c->Write();
     hist->Write();
     cf->Write();
+    cfFull->Write();
 
     otp->Save();
     otp->Close();

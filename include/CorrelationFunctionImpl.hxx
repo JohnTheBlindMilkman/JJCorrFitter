@@ -29,7 +29,7 @@
             private:
 
             protected:
-                static constexpr std::array<double,6> m_normalisationPoints{200,250,300,350,400,450};
+                static constexpr std::array<double,6> m_normalisationPoints{250,300,350,400,450,500};
                 static constexpr std::pair<double,double> m_cosThetaIntRange{-1,1};
                 static constexpr std::pair<double,double> m_rIntRange{0,50};
                 
@@ -40,7 +40,7 @@
                 std::string_view m_correlationFunctionName;
 
                 template <typename T, std::size_t N>
-                std::vector<double> CalculateIntSamplePoints(const std::pair<double,double> &range, const std::array<T,N> &abscissa) const noexcept
+                [[nodiscard]] std::vector<double> CalculateIntSamplePoints(const std::pair<double,double> &range, const std::array<T,N> &abscissa) const noexcept
                 {
                     std::vector<double> samples;
 
