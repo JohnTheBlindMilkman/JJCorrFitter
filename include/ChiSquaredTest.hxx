@@ -18,7 +18,9 @@
         class ChiSquaredTest : public LikelihoodImpl
         {
             private:
-                double CalculateChi2(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model); // this is not ideal implementation; const unique_ptr does not guarantee const TH1! I should use shared_ptr or raw
+                double CalculateChi2(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model) const;
+                double CalculateChi2TH1(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model) const;
+                double CalculateChi2TH3(const std::unique_ptr<TH1> &data, const std::unique_ptr<TH1> &model) const;
 
             public:
                 ChiSquaredTest(/* args */) = delete;

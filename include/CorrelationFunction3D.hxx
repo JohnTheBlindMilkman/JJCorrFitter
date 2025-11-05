@@ -53,7 +53,8 @@
                 void SetBinning(const std::unique_ptr<TH1> &data, double minKstar = -1, double maxKstar = -1);
                 void SetBinning(const std::string &name, const std::string &title, int nPoints, double minKStar, double maxKstar);
                 [[nodiscard]] std::unique_ptr<TH1> Evaluate();
-                [[nodiscard]] std::unique_ptr<TH1> EvaluateAtEdges();
+                [[nodiscard]] std::unique_ptr<TH1> EvaluateAtEdges(std::size_t nBins);
+                [[nodiscard]] std::unique_ptr<TH1> EvaluateAtPlanes(std::size_t nBins);
                 void SetParameters(const std::vector<double> &generalPars,const std::vector<double> &srcPars,const std::vector<double> &psiPars);
                 [[nodiscard]] std::size_t GetNParams() const noexcept;
                 [[nodiscard]] std::unique_ptr<TH1> GetCorrelationFunction();

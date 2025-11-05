@@ -199,17 +199,14 @@ namespace JJCorrFitter
 
     std::unique_ptr<TH1> CorrelationFunction3D::Evaluate()
     {
-        std::size_t counter = 0;
         for (int i = 0; i < m_nPoints; ++i)
             for (int j = 0; j < m_nPoints; ++j)
                 for (int k = 0; k < m_nPoints; ++k)
                 {
                     const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
                     const auto [val,err] = CalculatePoint(kx,ky,kz);   
-                    std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
                     m_correlationPoints(i,j,k) = val;
                     m_correlationErrors(i,j,k) = err;
-                    ++counter;
                 }
 
         NormaliseFunction(m_correlationPoints,m_correlationErrors); 
@@ -217,38 +214,74 @@ namespace JJCorrFitter
         return MakeHistogram(m_correlationPoints,m_correlationErrors,m_corrFuncParams);
     }
 
-    std::unique_ptr<TH1> CorrelationFunction3D::EvaluateAtEdges()
+    std::unique_ptr<TH1> CorrelationFunction3D::EvaluateAtEdges(std::size_t nBins)
     {
-        std::size_t counter = 0;
         for (int i = 0; i < m_nPoints; ++i)
-        {
-            const auto &[kx,ky,kz] = m_kStarValues(i,0,0);
-            const auto [val,err] = CalculatePoint(kx,ky,kz);
-            std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints(i,0,0) = val;
-            m_correlationErrors(i,0,0) = err;
-            ++counter;
-        }
+            for (int j = 0; j < nBins; ++j)
+                for (int k = 0; k < nBins; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
 
-        for (int j = 0; j < m_nPoints; ++j)
-        {
-            const auto &[kx,ky,kz] = m_kStarValues(0,j,0);
-            const auto [val,err] = CalculatePoint(kx,ky,kz);   
-            std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints(0,j,0) = val;
-            m_correlationErrors(0,j,0) = err;
-            ++counter;
-        }
+        for (int i = 0; i < nBins; ++i)
+            for (int j = 0; j < m_nPoints; ++j)
+                for (int k = 0; k < nBins; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);   
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
 
-        for (int k = 0; k < m_nPoints; ++k)
-        {
-            const auto &[kx,ky,kz] = m_kStarValues(0,0,k);
-            const auto [val,err] = CalculatePoint(kx,ky,kz);   
-            std::cout << counter << ": [" << kx << ',' << ky << ',' << kz << "] -> " << val << " +/- " << err << "\n";
-            m_correlationPoints(0,0,k) = val;
-            m_correlationErrors(0,0,k) = err;
-            ++counter;
-        }
+        for (int i = 0; i < nBins; ++i)
+            for (int j = 0; j < nBins; ++j)
+                for (int k = 0; k < m_nPoints; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);   
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
+
+        NormaliseFunction(m_correlationPoints,m_correlationErrors); 
+
+        return MakeHistogram(m_correlationPoints,m_correlationErrors,m_corrFuncParams);
+    }
+
+    std::unique_ptr<TH1> CorrelationFunction3D::EvaluateAtPlanes(std::size_t nBins)
+    {
+        for (int i = 0; i < m_nPoints; ++i)
+            for (int j = 0; j < m_nPoints; ++j)
+                for (int k = 0; k < nBins; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
+
+        for (int i = 0; i < nBins; ++i)
+            for (int j = 0; j < m_nPoints; ++j)
+                for (int k = 0; k < m_nPoints; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);   
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
+
+        for (int i = 0; i < m_nPoints; ++i)
+            for (int j = 0; j < nBins; ++j)
+                for (int k = 0; k < m_nPoints; ++k)
+                {
+                    const auto &[kx,ky,kz] = m_kStarValues(i,j,k);
+                    const auto [val,err] = CalculatePoint(kx,ky,kz);   
+                    m_correlationPoints(i,j,k) = val;
+                    m_correlationErrors(i,j,k) = err;
+                }
 
         NormaliseFunction(m_correlationPoints,m_correlationErrors); 
 
