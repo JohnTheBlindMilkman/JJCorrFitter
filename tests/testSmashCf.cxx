@@ -114,10 +114,34 @@ bool CheckValue(ROOT::Internal::TTreeReaderValueBase& value)
 
 int main()
 {
-    const std::string inputfileBase = "/home/jedkol/lustre/hades/user/kjedrzej/SmashResults/AuAu_1p23AGeV_0_80cent_softEoS/particle_list_";
-    constexpr std::size_t numberOfFiles = 5;
+    const std::string inputfileBase = "/home/jedkol/lustre/hades/user/kjedrzej/SmashResults/AuAu_1p23AGeV_0_80cent_hardEoS/particle_list_";
+    constexpr std::size_t numberOfFiles = 1;
 
     JJCorrFitter::InteractionTermSchrodinger wf;
+
+    constexpr double momBegin = 0.5;
+    constexpr double momStep = 1;
+    std::size_t momCounter = -1;
+    std::vector<double> momBins(500,0.);
+    std::generate(momBins.begin(),momBins.end(),[&momBegin,&momStep,&momCounter]{return momBegin + momStep * (++momCounter);});
+    wf.SetMomentumBins(std::move(momBins));
+
+    constexpr double rBegin = 0.5;
+    constexpr double rStep = 0.5;
+    std::size_t rCounter = -1;
+    std::vector<double> rBins(200);
+    std::generate(rBins.begin(),rBins.end(),[&rBegin,&rStep,&rCounter]{return rBegin + rStep * (++rCounter);});
+    wf.SetDistanceBins(std::move(rBins));
+
+    constexpr std::size_t elems = 200;
+    constexpr double stepCt = 2. / elems;
+    std::size_t ctCounter = 0;
+    std::vector<double> ctBins(elems,0.);
+    std::generate(ctBins.begin(),ctBins.end(),[&stepCt,&ctCounter]{return -1 + (++ctCounter) * stepCt;});
+    ctBins.push_back(1 + stepCt);
+    wf.SetCosThetaBins(std::move(ctBins));
+
+    wf.PopulateGrid();
     
     TChain *chain = new TChain("tree");
     for (const auto &i : ROOT::TSeqUL(numberOfFiles))
@@ -192,7 +216,7 @@ int main()
                 }
 
                 wf.SetMomentum(pair->m_kStar);
-                double weight = wf.GetValue(pair->m_rStar, pair->m_cosTheta);
+                double weight = (pair->m_kStar >= 499) ? 1. : wf.GetValue(pair->m_rStar, pair->m_cosTheta);
                 histSign.at(key).Fill(pair->m_kStar, weight);
                 histBckg.at(key).Fill(pair->m_kStar);
                 hWeight.Fill(pair->m_cosTheta, weight);
@@ -211,7 +235,7 @@ int main()
     
     // mixer.PrintStatus();
     
-    TFile otpFile("result_softEoS.root","recreate");
+    TFile otpFile("result_hardEoS.root","recreate");
 
     hWeight.Write();
     for (const auto &[key,hist] : histSign)

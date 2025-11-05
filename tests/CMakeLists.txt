@@ -16,9 +16,17 @@ if(JJCORRFITTER_ENABLE_TESTS)
     target_link_libraries(calcMomRes1DSMASH PRIVATE JJCorrFitter)
     target_compile_features(calcMomRes1DSMASH  PRIVATE cxx_std_17)
 
+    add_executable(calcMomRes3DSMASH testMomRes3DSMASH.cxx)
+    target_link_libraries(calcMomRes3DSMASH PRIVATE JJCorrFitter)
+    target_compile_features(calcMomRes3DSMASH  PRIVATE cxx_std_17)
+
     add_executable(fit1DCF testFit.cxx)
     target_link_libraries(fit1DCF PRIVATE JJCorrFitter)
     target_compile_features(fit1DCF  PRIVATE cxx_std_17)
+
+    add_executable(fit3DCF testFit3D.cxx)
+    target_link_libraries(fit3DCF PRIVATE JJCorrFitter)
+    target_compile_features(fit3DCF  PRIVATE cxx_std_17)
 
     add_executable(smashCf testSmashCf.cxx)
     target_link_libraries(smashCf PRIVATE JJCorrFitter)

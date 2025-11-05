@@ -54,7 +54,7 @@ namespace JJCorrFitter
         auto ctSize = m_ctPoints.size();
 
         if (qSize == 0 || rSize == 0 || ctSize == 0)
-            throw std::runtime_error("InteractionTermSchroedinger::PolulateGrid(): current grid size is 0 in (at least) one dimension");
+            throw std::runtime_error("InteractionTermSchroedinger::PolulateGrid - current grid size is 0 in (at least) one dimension");
 
         m_grid = Grid<double>(qSize,rSize,ctSize);
 

@@ -1,13 +1,10 @@
 #include "Fitter.hxx"
-#include "CorrelationFunction1D.hxx"
-#include "SourceFunction1D.hxx"
-#include "DoubleGaussian1D.hxx"
-#include "CauchySource1D.hxx"
+#include "CorrelationFunction3D.hxx"
+#include "SourceFunction3D.hxx"
 #include "InteractionTermSchrodinger.hxx"
 #include "InteractionTermPhaseShift.hxx"
 #include "InteractionTermTPI.hxx"
 #include "ChiSquaredTest.hxx"
-#include "LogLikelihoodTest.hxx"
 
 #include "Minuit2/Minuit2Minimizer.h"
 #include "TFile.h"
@@ -16,16 +13,13 @@
 #include "TPaveText.h"
 #include "../../HADES/HADES-CrAP/Externals/Palettes.hxx"
 
+#include <chrono>
+
 void prepareGraph(const std::unique_ptr<TH1> &hist, Color_t col)
 {
     hist->SetMarkerColor(col);
     hist->SetMarkerStyle(6);
     hist->SetLineColor(col);
-
-    //hist->GetXaxis()->SetLabelSize();
-    //hist->GetXaxis()->SetLabelOffset();
-    //hist->GetXaxis()->SetTitleSize();
-    //hist->GetXaxis()->SetTitleOffset();
 
     hist->GetXaxis()->SetTitleOffset();
     hist->GetXaxis()->SetTitleSize(0.06);
@@ -34,6 +28,9 @@ void prepareGraph(const std::unique_ptr<TH1> &hist, Color_t col)
     hist->GetYaxis()->SetTitleSize(0.06);
     hist->GetYaxis()->SetLabelSize(0.06);
     hist->GetYaxis()->SetNdivisions(506);
+    hist->GetZaxis()->SetTitleSize(0.06);
+    hist->GetZaxis()->SetLabelSize(0.06);
+    hist->GetZaxis()->SetNdivisions(506);
 }
 
 int main()
@@ -41,27 +38,23 @@ int main()
     using ParType = JJCorrFitter::Fitter::ParType;
 
     // load data
-    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_forHAL.root"));
-    std::unique_ptr<TH1> hist(itp->Get<TH1D>("hQinvRatInteg"));
-    // std::unique_ptr<TFile> itp2(TFile::Open("/home/jedkol/lxpool/hades-crap/output/1Dcorr_0_10_cent_Purity_forHAL.root"));
-    // std::unique_ptr<TH1> signal(itp2->Get<TH1D>("hQinvSignInteg"));
-    // std::unique_ptr<TH1> background(itp2->Get<TH1D>("hQinvBckgInteg"));
+    std::unique_ptr<TFile> itp(TFile::Open("/home/jedkol/Downloads/JJCorrFitter/macros/input/draw3DCF_sim_errs_pts.root"));
+    std::unique_ptr<TH1> hist(itp->Get<TH3D>("hQoslRatInteg_gauss"));
 
     // create CF object
-    std::unique_ptr<JJCorrFitter::CorrelationFunction1D> func = std::make_unique<JJCorrFitter::CorrelationFunction1D>
+    std::unique_ptr<JJCorrFitter::CorrelationFunction3D> func = std::make_unique<JJCorrFitter::CorrelationFunction3D>
     (
-        std::make_unique<JJCorrFitter::SourceFunction1D>(),
-        //std::make_unique<JJCorrFitter::InteractionTermTPI>(JJCorrFitter::InteractionTermTPI::SpinState::None)
+        std::make_unique<JJCorrFitter::SourceFunction3D>(),
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
     func->SetBinning(hist,12,80);
 
-    JJCorrFitter::CorrelationFunction1D func2
+    JJCorrFitter::CorrelationFunction3D func2
     (
-        std::make_unique<JJCorrFitter::SourceFunction1D>(),
+        std::make_unique<JJCorrFitter::SourceFunction3D>(),
         std::make_unique<JJCorrFitter::InteractionTermSchrodinger>()
     );
-    func2.SetBinning("fitFullInteg",hist->GetTitle(),hist->GetNbinsX(),hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
+    func2.SetBinning("fitFullInteg",hist->GetTitle(),hist->GetNbinsX() * 4,hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
 
     // create fitter object
     JJCorrFitter::Fitter fitter
@@ -74,8 +67,9 @@ int main()
     // set parameters with limits
     fitter.SetParameter(ParType::Generic,"N",1.,0.001,0.95,1.05);
     fitter.SetParameter(ParType::Generic,"Lambda",1./* ,0.001,0.,1. */);
-    fitter.SetParameter(ParType::Source,"Rinv",2.5,0.001,0.5,6.);
-    //fitter.SetParameter(ParType::Source,"Rinv2",6.,0.001,0.5,10.);
+    fitter.SetParameter(ParType::Source,"Rout",2.5,0.001,0.5,6.);
+    fitter.SetParameter(ParType::Source,"Rside",2.5,0.001,0.5,6.);
+    fitter.SetParameter(ParType::Source,"Rlong",2.5,0.001,0.5,6.);
 
     // set fit tolerance and ROOT::Minimizer print level
     fitter.SetPrintLevel(0);
@@ -84,46 +78,29 @@ int main()
     // print setup summary
     fitter.PrintInfo();
 
+    auto start = std::chrono::high_resolution_clock::now();
     // perform fit
     fitter.Fit();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Fitting time: " << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "\n";
 
     // get CF
     std::unique_ptr<TH1> cf = fitter.GetFitFunction();
+    cf->SetLineColor(JJColor::fWutSecondaryColors[3]);
     hist = fitter.GetDataHistogram();
     hist->GetXaxis()->SetRangeUser(0,200);
-    hist->SetTitle(";k^{*} [MeV/c];C(k^{*})");
+    hist->SetTitle(";k^{*}_{out} [MeV/c];k^{*}_{side} [MeV/c];k^{*}_{long} [MeV/c];C(k^{*})");
     prepareGraph(hist,JJColor::fWutMainColors[1]);
 
-    // make text box with fit params
-    std::unique_ptr<TPaveText> tpt(new TPaveText(0.6,0.85,0.98,0.98,"nbr"));
-    tpt->SetTextAngle(12);
-    tpt->SetFillColor(0);
-
-    std::vector<std::string> parNames{"N","#lambda","R_{inv}"};
     auto params = fitter.GetFitParameterValues();
     auto errors = fitter.GetFitParameterErrors();
-    for (std::size_t i = 0 ; i < parNames.size(); ++i)
-    {
-        tpt->AddText(TString::Format("%s = %lf +/- %lf",parNames.at(i).c_str(),params.at(i),errors.at(i)));
-    }
 
-    func2.SetParameters({params[0],params[1]},{params[2]},{});
-    auto cfFull = func2.Evaluate();
+    func2.SetParameters({params[0],params[1]},{params[2],params[3],params[4]},{});
+    auto cfFull = func2.EvaluateAtPlanes(4);
     cfFull->SetLineColor(JJColor::fWutSecondaryColors[3]);
     cfFull->SetLineStyle(kDashed);
 
-    std::unique_ptr<TCanvas> c(new TCanvas("c","",800,800));
-    c->SetMargin(0.15,0.02,0.15,0.02);
-    JJColor::CreatePrimaryWutGradient();
-
-    hist->Draw();
-    cf->SetLineColor(JJColor::fWutSecondaryColors[3]);
-    cf->Draw("c same");
-    cfFull->Draw("c same");
-    tpt->Draw("same");
-
-    std::unique_ptr<TFile> otp(TFile::Open("fit1DCF.root","recreate"));
-    c->Write();
+    std::unique_ptr<TFile> otp(TFile::Open("fit3DCF.root","recreate"));
     hist->Write();
     cf->Write();
     cfFull->Write();
