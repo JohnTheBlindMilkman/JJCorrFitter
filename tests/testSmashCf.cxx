@@ -11,6 +11,7 @@
 #include "/home/jedkol/Downloads/HADES/JJFemtoMixer/JJFemtoMixer.hxx"
 #include "/home/jedkol/Downloads/indicators/single_include/indicators/indicators.hpp"
 
+#include "InteractionTermSquareWell.hxx"
 #include "InteractionTermSchrodinger.hxx"
 
 struct Track
@@ -18,11 +19,12 @@ struct Track
     ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > m_idealMom, m_smearedMom, m_idealPos;
     int m_origin;
     double m_formationTime;
+    double m_impactPar;
     Track(const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > &idealMom, 
     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > &smearedMom, 
     const ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > &idealPos, 
-    int origin, double formationTime) : 
-        m_idealMom(idealMom), m_smearedMom(smearedMom), m_idealPos(idealPos), m_origin(origin), m_formationTime(formationTime) {}
+    int origin, double formationTime, double impPar) : 
+        m_idealMom(idealMom), m_smearedMom(smearedMom), m_idealPos(idealPos), m_origin(origin), m_formationTime(formationTime), m_impactPar(impPar) {}
 };
 
 struct Event
@@ -30,18 +32,21 @@ struct Event
     std::string m_ID;
     std::size_t m_nTracks;
     std::vector<std::shared_ptr<Track> > m_tracks;
-    Event(std::string ID, std::size_t nTracks) : m_ID(ID), m_nTracks(nTracks) {}
+    double m_impactPar;
+    Event(std::string ID, std::size_t nTracks, double impPar) : m_ID(ID), m_nTracks(nTracks), m_impactPar(impPar) {}
     [[nodiscard]] const std::string& GetID() const noexcept {return m_ID;}
 };
 
 struct Pair
 {
     std::shared_ptr<Track> m_track1, m_track2;
-    double m_kStar, m_rStar, m_kT, m_rapidity, m_cosTheta;
+    double m_kStar, m_rStar, m_kT, m_rapidity, m_cosTheta, m_kStarOut, m_kStarSide, m_kStarLong;
+    double m_impactPar;
 
     Pair(const std::shared_ptr<Track> &trck1, const std::shared_ptr<Track> &trck2) : m_track1(trck1), m_track2(trck2) 
     {
         CalcKinematics(m_track1, m_track2);
+        m_impactPar = m_track1->m_impactPar;
     }
     void CalcKinematics(const std::shared_ptr<Track> &track1, const std::shared_ptr<Track> &track2)
     {
@@ -64,15 +69,15 @@ struct Pair
         // Boost to LCMS
         double tBeta = tPz / tE;
         double tGamma = tE / tMt;	
-        double mKStarLong = tGamma * (track1->m_idealMom.Pz() - tBeta * track1->m_idealMom.E());
+        m_kStarLong = tGamma * (track1->m_idealMom.Pz() - tBeta * track1->m_idealMom.E());
         double tE1L = tGamma * (track1->m_idealMom.E()  - tBeta * track1->m_idealMom.Pz());   
         
         // Rotate in transverse plane
-        double mKStarOut  = ( track1->m_idealMom.Px() * tPx + track1->m_idealMom.Py() * tPy) / m_kT;
-        double mKStarSide = (-track1->m_idealMom.Px() * tPy + track1->m_idealMom.Py() * tPx) / m_kT;
+        m_kStarOut  = ( track1->m_idealMom.Px() * tPx + track1->m_idealMom.Py() * tPy) / m_kT;
+        m_kStarSide = (-track1->m_idealMom.Px() * tPy + track1->m_idealMom.Py() * tPx) / m_kT;
 
         // Boost to pair cms
-        mKStarOut = tMt / tM * (mKStarOut - m_kT / tMt * tE1L);
+        m_kStarOut = tMt / tM * (m_kStarOut - m_kT / tMt * tE1L);
 
         double tDX = track1->m_idealPos.X() * FmToGev - track2->m_idealPos.X() * FmToGev;
         double tDY = track1->m_idealPos.Y() * FmToGev - track2->m_idealPos.Y() * FmToGev;
@@ -92,14 +97,33 @@ struct Pair
 
         double mROutPairCMS = tGamma * (mROut - tBeta * mDTimePairLCMS);
 
-        m_kStar = std::sqrt(mKStarSide * mKStarSide + mKStarOut * mKStarOut + mKStarLong * mKStarLong);
+        m_kStar = std::sqrt(m_kStarSide * m_kStarSide + m_kStarOut * m_kStarOut + m_kStarLong * m_kStarLong);
         m_rStar = std::sqrt(mROutPairCMS * mROutPairCMS + mRSidePairCMS * mRSidePairCMS + mRLongPairCMS * mRLongPairCMS);
-        m_cosTheta = (mKStarOut * mROutPairCMS + mKStarSide * mRSidePairCMS + mKStarLong * mRLongPairCMS) / (m_kStar * m_rStar);
+        m_cosTheta = (m_kStarOut * mROutPairCMS + m_kStarSide * mRSidePairCMS + m_kStarLong * mRLongPairCMS) / (m_kStar * m_rStar);
 
         m_kStar *= GeVToMeV;
         m_rStar *= GevToFm;
+        m_kStarOut *= GeVToMeV;
+        m_kStarSide *= GeVToMeV;
+        m_kStarLong *= GeVToMeV;
     }
 };
+
+std::string EventGrouping(const std::shared_ptr<Event> &event)
+{
+    static constexpr std::array<double,5> centralities{0,4.7,6.6,8.1,9.3};
+    int centrality = std::distance(centralities.begin(),std::lower_bound(centralities.begin(),centralities.end(),event->m_impactPar));
+
+    return std::to_string(centrality);
+}
+
+std::string PairGrouping(const std::shared_ptr<Pair> &pair)
+{
+    static constexpr std::array<double,5> centralities{0,4.7,6.6,8.1,9.3};
+    int centrality = std::distance(centralities.begin(),std::lower_bound(centralities.begin(),centralities.end(),pair->m_impactPar));
+
+    return std::to_string(centrality);
+}
 
 bool CheckValue(ROOT::Internal::TTreeReaderValueBase& value) 
 {
@@ -115,33 +139,34 @@ bool CheckValue(ROOT::Internal::TTreeReaderValueBase& value)
 int main()
 {
     const std::string inputfileBase = "/home/jedkol/lustre/hades/user/kjedrzej/SmashResults/AuAu_1p23AGeV_0_80cent_hardEoS/particle_list_";
-    constexpr std::size_t numberOfFiles = 1;
+    constexpr std::size_t numberOfFiles = 10;
 
-    JJCorrFitter::InteractionTermSchrodinger wf;
+    JJCorrFitter::InteractionTermSquareWell wf;
+    // JJCorrFitter::InteractionTermSchrodinger wf;
 
-    constexpr double momBegin = 0.5;
-    constexpr double momStep = 1;
-    std::size_t momCounter = -1;
-    std::vector<double> momBins(500,0.);
-    std::generate(momBins.begin(),momBins.end(),[&momBegin,&momStep,&momCounter]{return momBegin + momStep * (++momCounter);});
-    wf.SetMomentumBins(std::move(momBins));
+    // constexpr double momBegin = 0.5;
+    // constexpr double momStep = 1;
+    // std::size_t momCounter = -1;
+    // std::vector<double> momBins(500,0.);
+    // std::generate(momBins.begin(),momBins.end(),[&momBegin,&momStep,&momCounter]{return momBegin + momStep * (++momCounter);});
+    // wf.SetMomentumBins(std::move(momBins));
 
-    constexpr double rBegin = 0.5;
-    constexpr double rStep = 0.5;
-    std::size_t rCounter = -1;
-    std::vector<double> rBins(200);
-    std::generate(rBins.begin(),rBins.end(),[&rBegin,&rStep,&rCounter]{return rBegin + rStep * (++rCounter);});
-    wf.SetDistanceBins(std::move(rBins));
+    // constexpr double rBegin = 0.5;
+    // constexpr double rStep = 0.5;
+    // std::size_t rCounter = -1;
+    // std::vector<double> rBins(200);
+    // std::generate(rBins.begin(),rBins.end(),[&rBegin,&rStep,&rCounter]{return rBegin + rStep * (++rCounter);});
+    // wf.SetDistanceBins(std::move(rBins));
 
-    constexpr std::size_t elems = 200;
-    constexpr double stepCt = 2. / elems;
-    std::size_t ctCounter = 0;
-    std::vector<double> ctBins(elems,0.);
-    std::generate(ctBins.begin(),ctBins.end(),[&stepCt,&ctCounter]{return -1 + (++ctCounter) * stepCt;});
-    ctBins.push_back(1 + stepCt);
-    wf.SetCosThetaBins(std::move(ctBins));
+    // constexpr std::size_t elems = 200;
+    // constexpr double stepCt = 2. / elems;
+    // std::size_t ctCounter = 0;
+    // std::vector<double> ctBins(elems,0.);
+    // std::generate(ctBins.begin(),ctBins.end(),[&stepCt,&ctCounter]{return -1 + (++ctCounter) * stepCt;});
+    // ctBins.push_back(1 + stepCt);
+    // wf.SetCosThetaBins(std::move(ctBins));
 
-    wf.PopulateGrid();
+    // wf.PopulateGrid();
     
     TChain *chain = new TChain("tree");
     for (const auto &i : ROOT::TSeqUL(numberOfFiles))
@@ -150,6 +175,7 @@ int main()
     }
 
     TTreeReader reader(chain);
+    TTreeReaderValue<double> impactPar(reader,"impactPar");
     TTreeReaderValue<int> nTracks(reader,"tracks");
     TTreeReaderValue<std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > > > fourPosIdeal(reader,"posIdeal");
     TTreeReaderValue<std::vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > > > fourMomIdeal(reader,"momIdeal");
@@ -170,8 +196,8 @@ int main()
 
     Mixing::JJFemtoMixer<Event,Track,Pair> mixer;
     mixer.SetMaxBufferSize(0);
-    // mixer.SetEventHashingFunction();
-    // mixer.SetPairHashingFunction();
+    mixer.SetEventHashingFunction(EventGrouping);
+    mixer.SetPairHashingFunction(PairGrouping);
     // mixer.SetPairCuttingFunction();
 
     std::map<std::string,TH1D> histSign, histBckg;
@@ -186,6 +212,7 @@ int main()
         if (firstEntry) 
         {
             // Check that branches exist and their types match our expectation.
+            if (!CheckValue(impactPar)) break;
             if (!CheckValue(nTracks)) break;
             if (!CheckValue(fourPosIdeal)) break;
             if (!CheckValue(fourMomIdeal)) break;
@@ -195,31 +222,34 @@ int main()
             firstEntry = false;
         }
 
-        event = std::make_shared<Event>(std::to_string(reader.GetCurrentEntry()),*nTracks);
+        event = std::make_shared<Event>(std::to_string(reader.GetCurrentEntry()),*nTracks,*impactPar);
 
         for (const auto &i : ROOT::TSeqUL(*nTracks))
         {
-            track = std::make_shared<Track>(fourMomIdeal->at(i),fourMomSmeared->at(i),fourPosIdeal->at(i),procTypeOrigin->at(i),formationTime->at(i));
+            track = std::make_shared<Track>(fourMomIdeal->at(i),fourMomSmeared->at(i),fourPosIdeal->at(i),procTypeOrigin->at(i),formationTime->at(i),*impactPar);
             event->m_tracks.push_back(track);
         }
 
-        auto signal = mixer.AddEvent(event,event->m_tracks);
-
-        for (const auto &[key,pairs] : signal)
+        if (*nTracks > 0)
         {
-            for (const auto &pair : pairs)
-            {
-                if (histSign.find(key) == histSign.end())
-                {
-                    histSign.emplace(key, TH1D(TString::Format("hkStarSign_%s",key.data()),"Signal of Protons 0-10%% centrality;k^{*} [MeV/c];CF(k^{*})",750,0,1500));
-                    histBckg.emplace(key, TH1D(TString::Format("hkStarBckg_%s",key.data()),"Backgound of Protons 0-10%% centrality;k^{*} [MeV/c];CF(k^{*})",750,0,1500));
-                }
+            auto signal = mixer.AddEvent(event,event->m_tracks);
 
-                wf.SetMomentum(pair->m_kStar);
-                double weight = (pair->m_kStar >= 499) ? 1. : wf.GetValue(pair->m_rStar, pair->m_cosTheta);
-                histSign.at(key).Fill(pair->m_kStar, weight);
-                histBckg.at(key).Fill(pair->m_kStar);
-                hWeight.Fill(pair->m_cosTheta, weight);
+            for (const auto &[key,pairs] : signal)
+            {
+                for (const auto &pair : pairs)
+                {
+                    if (histSign.find(key) == histSign.end())
+                    {
+                        histSign.emplace(key, TH1D(TString::Format("hkStarSign_%s",key.data()),"Signal of Protons 0-10%% centrality;k^{*} [MeV/c];CF(k^{*})",750,0,1500));
+                        histBckg.emplace(key, TH1D(TString::Format("hkStarBckg_%s",key.data()),"Backgound of Protons 0-10%% centrality;k^{*} [MeV/c];CF(k^{*})",750,0,1500));
+                    }
+
+                    wf.SetMomentum(pair->m_kStar);
+                    double weight = /* (pair->m_kStar >= 499) ? 1. : */ wf.GetValue(pair->m_rStar, pair->m_cosTheta);
+                    histSign.at(key).Fill(pair->m_kStar, weight);
+                    histBckg.at(key).Fill(pair->m_kStar);
+                    hWeight.Fill(pair->m_cosTheta, weight);
+                }
             }
         }
 
@@ -235,7 +265,7 @@ int main()
     
     // mixer.PrintStatus();
     
-    TFile otpFile("result_hardEoS.root","recreate");
+    TFile otpFile("result.root","recreate");
 
     hWeight.Write();
     for (const auto &[key,hist] : histSign)
